@@ -12,6 +12,7 @@ import socket
 import math
 import json
 import write_profile
+import owm_daily
 
 LOGGER = polyinterface.LOGGER
 
@@ -29,6 +30,8 @@ class Controller(polyinterface.Controller):
         self.units = 'metric'
         self.configured = False
         self.myConfig = {}
+        self.latitude = 0
+        self.fcast = {}
 
         self.poly.onConfig(self.process_config)
 
@@ -66,9 +69,22 @@ class Controller(polyinterface.Controller):
 
     def start(self):
         LOGGER.info('Starting node server')
+        for day in range(1,6):
+            address = 'forecast_' + str(day)
+            title = 'Forecast ' + str(day)
+            try:
+                node = owm_daily.DailyNode(self, self.address, address, title)
+                self.addNode(node)
+            except:
+                LOGGER.error('Failed to create forecast node ' + title)
+
         self.check_params()
         # TODO: Discovery
         LOGGER.info('Node server started')
+
+        # Do an initial query to get filled in as soon as possible
+        self.query_conditions()
+        self.query_forecast()
 
     def longPoll(self):
         self.query_forecast()
@@ -101,6 +117,8 @@ class Controller(polyinterface.Controller):
         jdata = json.loads(wdata.decode('utf-8'))
         c.close()
 
+        self.latitude = jdata['coord']['lat']
+
         # Query UV index data
         request = 'http://api.openweathermap.org/data/2.5/uvi?'
         request += 'appid=' + self.apikey
@@ -132,34 +150,37 @@ class Controller(polyinterface.Controller):
 
         # Assume we always get the main section with data
         self.setDriver('CLITEMP', float(jdata['main']['temp']),
-                report=True, force=True)
+                report=True, force=False)
         self.setDriver('CLIHUM', float(jdata['main']['humidity']),
-                report=True, force=True)
+                report=True, force=False)
         self.setDriver('BARPRES', float(jdata['main']['pressure']),
-                report=True, force=True)
+                report=True, force=False)
         self.setDriver('GV0', float(jdata['main']['temp_max']),
-                report=True, force=True)
+                report=True, force=False)
         self.setDriver('GV1', float(jdata['main']['temp_min']),
-                report=True, force=True)
+                report=True, force=False)
         if 'wind' in jdata:
             self.setDriver('GV4', float(jdata['wind']['speed']),
-                    report=True, force=True)
-            self.setDriver('WINDDIR', float(jdata['wind']['deg']),
-                    report=True, force=True)
+                    report=True, force=False)
+            try:
+                self.setDriver('WINDDIR', float(jdata['wind']['deg']),
+                    report=True, force=False)
+            except:
+                LOGGER.debug('missing data for wind direction')
         if 'visibility' in jdata:
             self.setDriver('GV15', float(jdata['visibility']),
-                    report=True, force=True)
+                    report=True, force=False)
         if 'rain' in jdata:
             self.setDriver('GV6', float(jdata['rain']['3h']),
-                    report=True, force=True)
+                    report=True, force=False)
         if 'clouds' in jdata:
             self.setDriver('GV14', float(jdata['clouds']['all']),
-                    report=True, force=True)
+                    report=True, force=False)
         if 'weather' in jdata:
             self.setDriver('GV13', jdata['weather'][0]['id'],
-                    report=True, force=True)
+                    report=True, force=False)
         
-        self.setDriver('GV16', float(uv_data['value']), True, True)
+        self.setDriver('GV16', float(uv_data['value']), True, False)
 
     def query_forecast(self):
         # Three hour forecast for 5 days (or about 30 entries). This
@@ -191,29 +212,58 @@ class Controller(polyinterface.Controller):
 
         # Records are for 3 hour intervals starting at midnight UTC time
         # this makes it difficult to map to local day forecasts.
+        day = 1
         if 'list' in jdata:
             for forecast in jdata['list']:
 
+                # we need to look at every 3 hr entry and build the 
+                # temp and humidity min/max and also average for pressure
+                # and wind speed. Looking at only the first 3 hrs isn't
+                # really usefull
                 dt = forecast['dt_txt'].split(' ')
-                if dt[1] != '12:00:00':
-                    continue
 
-                LOGGER.info('forecast for %s' % forecast['dt_txt'])
-                if 'main' in forecast:
-                    LOGGER.info('main %f %f %f %f %f %f' % (
-                        forecast['main']['temp'],
-                        forecast['main']['temp_min'],
-                        forecast['main']['temp_max'],
-                        forecast['main']['humidity'],
-                        forecast['main']['grnd_level'],
-                        forecast['main']['sea_level']))
-                if 'weather' in forecast:
-                    LOGGER.info('weather: %s' % forecast['weather'][0]['description'])
-                if 'wind' in forecast:
-                    LOGGER.info('wind %f %f' % (forecast['wind']['speed'], forecast['wind']['deg']))
-                if 'clouds' in forecast:
-                    LOGGER.info('cloud %f' % (forecast['clouds']['all']))
-                LOGGER.info(' --- ')
+                LOGGER.info('date and time: %s %s' % (dt[0], dt[1]))
+                #if dt[1] != '12:00:00':
+                #    continue
+
+                if dt[1] == '00:00:00':
+                    # Initialize values
+                    self.fcast['temp_max'] = float(forecast['main']['temp_max'])
+                    self.fcast['temp_min'] = float(forecast['main']['temp_min'])
+                    self.fcast['Hmax'] = float(forecast['main']['humidity'])
+                    self.fcast['Hmin'] = float(forecast['main']['humidity'])
+                    self.fcast['pressure'] = float(forecast['main']['pressure'])
+                    self.fcast['weather'] = float(forecast['weather'][0]['id'])
+                    self.fcast['speed'] = float(forecast['wind']['speed'])
+                    self.fcast['clouds'] = float(forecast['clouds']['all'])
+                    self.fcast['dt'] = forecast['dt']
+                else:
+                    # check for high/low
+                    if float(forecast['main']['temp_max']) > self.fcast['temp_max']:
+                        self.fcast['temp_max'] = float(forecast['main']['temp_max'])
+                    if float(forecast['main']['temp_min']) < self.fcast['temp_min']:
+                        self.fcast['temp_min'] = float(forecast['main']['temp_min'])
+                    if float(forecast['main']['humidity']) > self.fcast['Hmax']:
+                        self.fcast['Hmax'] = float(forecast['main']['humidity'])
+                    if float(forecast['main']['humidity']) < self.fcast['Hmin']:
+                        self.fcast['Hmin'] = float(forecast['main']['humidity'])
+
+                    self.fcast['pressure'] += float(forecast['main']['pressure'])
+                    self.fcast['speed'] += float(forecast['wind']['speed'])
+                    self.fcast['clouds'] += float(forecast['clouds']['all'])
+
+                    # sum for averages
+
+                if dt[1] == '21:00:00':
+                    self.fcast['pressure'] /= 8
+                    self.fcast['speed'] /= 8
+                    self.fcast['clouds'] /= 8
+                    LOGGER.info(self.fcast)
+                    # Update the forecast
+                    address = 'forecast_' + str(day)
+                    #self.nodes[address].update_forecast(forecast, self.latitude, 400, 0.23, self.units)
+                    self.nodes[address].update_forecast(self.fcast, self.latitude, 400, 0.23, self.units)
+                    day += 1
 
 
     def query(self):
@@ -269,43 +319,33 @@ class Controller(polyinterface.Controller):
         LOGGER.info('Configure drivers ---')
         if self.units == 'metric':
             for driver in self.drivers:
-                if driver['driver'] == 'CLITEMP':
-                    driver['uom'] = 4
-                if driver['driver'] == 'DEWPT':
-                    driver['uom'] = 4
-                if driver['driver'] == 'GV0':
-                    driver['uom'] = 4
-                if driver['driver'] == 'GV1':
-                    driver['uom'] = 4
-                if driver['driver'] == 'GV2':
-                    driver['uom'] = 4
-                if driver['driver'] == 'GV3':
-                    driver['uom'] = 4
-                if driver['driver'] == 'GV4':
-                    driver['uom'] = 49
-                if driver['driver'] == 'GV5':
-                    driver['uom'] = 49
+                if driver['driver'] == 'CLITEMP': driver['uom'] = 4
+                if driver['driver'] == 'DEWPT': driver['uom'] = 4
+                if driver['driver'] == 'GV0': driver['uom'] = 4
+                if driver['driver'] == 'GV1': driver['uom'] = 4
+                if driver['driver'] == 'GV2': driver['uom'] = 4
+                if driver['driver'] == 'GV3': driver['uom'] = 4
+                if driver['driver'] == 'GV4': driver['uom'] = 49
+                if driver['driver'] == 'GV5': driver['uom'] = 49
+            for day in range(1,6):
+                address = 'forecast_' + str(day)
+                self.nodes[address].set_units('metric')
         else:  # imperial
             for driver in self.drivers:
-                if driver['driver'] == 'CLITEMP':
-                    driver['uom'] = 17
-                if driver['driver'] == 'DEWPT':
-                    driver['uom'] = 17
-                if driver['driver'] == 'GV0':
-                    driver['uom'] = 17
-                if driver['driver'] == 'GV1':
-                    driver['uom'] = 17
-                if driver['driver'] == 'GV2':
-                    driver['uom'] = 17
-                if driver['driver'] == 'GV3':
-                    driver['uom'] = 17
-                if driver['driver'] == 'GV4':
-                    driver['uom'] = 48
-                if driver['driver'] == 'GV5':
-                    driver['uom'] = 48
+                if driver['driver'] == 'CLITEMP': driver['uom'] = 17
+                if driver['driver'] == 'DEWPT': driver['uom'] = 17
+                if driver['driver'] == 'GV0': driver['uom'] = 17
+                if driver['driver'] == 'GV1': driver['uom'] = 17
+                if driver['driver'] == 'GV2': driver['uom'] = 17
+                if driver['driver'] == 'GV3': driver['uom'] = 17
+                if driver['driver'] == 'GV4': driver['uom'] = 48
+                if driver['driver'] == 'GV5': driver['uom'] = 48
+            for day in range(1,6):
+                address = 'forecast_' + str(day)
+                self.nodes[address].set_units('imperial')
 
         # Write out a new node definition file here.
-        write_profile.write_profile(LOGGER, self.drivers)
+        write_profile.write_profile(LOGGER, self.drivers, self.nodes['forecast_1'].drivers)
         self.poly.installprofile()
 
     def remove_notices_all(self, command):

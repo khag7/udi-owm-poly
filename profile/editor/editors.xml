@@ -56,5 +56,17 @@
     <editor id="UV">
         <range uom="71" min="0" max="15" prec="1" />
     </editor>
+    <editor id="OZONE">
+        <range uom="56" min="0" max="500" prec="2" />
+    </editor>
+    <editor id="MILES">
+        <range uom="116" min="0" max="500" prec="2" />
+    </editor>
+    <editor id="DAY">
+        <range uom="25" min="0" max="6" nls="EN_DAY" />
+    </editor>
+    <editor id="ET">
+        <range uom="106"  prec="2" />
+    </editor>
 
 </editors>
