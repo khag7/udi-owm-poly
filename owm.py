@@ -31,6 +31,7 @@ class Controller(polyinterface.Controller):
         self.configured = False
         self.myConfig = {}
         self.latitude = 0
+        self.longitude = 0
         self.fcast = {}
 
         self.poly.onConfig(self.process_config)
@@ -118,6 +119,7 @@ class Controller(polyinterface.Controller):
         c.close()
 
         self.latitude = jdata['coord']['lat']
+        self.longitude = jdata['coord']['lon']
 
         # Query UV index data
         request = 'http://api.openweathermap.org/data/2.5/uvi?'
@@ -168,11 +170,20 @@ class Controller(polyinterface.Controller):
             except:
                 LOGGER.debug('missing data for wind direction')
         if 'visibility' in jdata:
-            self.setDriver('GV15', float(jdata['visibility']),
-                    report=True, force=False)
+            # always reported in meters convert to either km or miles
+            if self.units == 'metric':
+                vis = float(jdata['visibility']) / 1000
+            else:
+                vis = float(jdata['visibility']) * 0.000621371
+            self.setDriver('GV15', round(vis,1), report=True, force=False)
         if 'rain' in jdata:
-            self.setDriver('GV6', float(jdata['rain']['3h']),
-                    report=True, force=False)
+            # rain is reported in mm, need to convert to inches
+            rain = float(jdata['rain']['3h'])
+            if self.units == 'imperial':
+                rain *= 0.0393701
+            self.setDriver('GV6', round(rain, 2), report=True, force=False)
+        else:
+            self.setDriver('GV6', 0, report=True, force=True)
         if 'clouds' in jdata:
             self.setDriver('GV14', float(jdata['clouds']['all']),
                     report=True, force=False)
@@ -204,6 +215,18 @@ class Controller(polyinterface.Controller):
         c = http.request('GET', request)
         wdata = c.data
         c.close()
+
+        # query UV forecast
+        request = 'http://api.openweathermap.org/data/2.5/uvi/forecast?'
+        request += 'appid=' + self.apikey
+        # Only query by lat/lon so need to pull that from jdata
+        request += '&lat=' + str(self.latitude)
+        request += '&lon=' + str(self.longitude)
+        c = http.request('GET', request)
+        uv_data = json.loads(c.data.decode('utf-8'))
+        c.close()
+        #LOGGER.debug(uv_data)
+
         http.clear()
 
         jdata = json.loads(wdata.decode('utf-8'))
@@ -212,7 +235,12 @@ class Controller(polyinterface.Controller):
 
         # Records are for 3 hour intervals starting at midnight UTC time
         # this makes it difficult to map to local day forecasts.
+        # Also note that this may start in the middle of the current day
+        # so we need to skip those values.  This also means that we may
+        # not end at 21:00.
         day = 1
+        start = False
+        count = 0
         if 'list' in jdata:
             for forecast in jdata['list']:
 
@@ -237,7 +265,10 @@ class Controller(polyinterface.Controller):
                     self.fcast['speed'] = float(forecast['wind']['speed'])
                     self.fcast['clouds'] = float(forecast['clouds']['all'])
                     self.fcast['dt'] = forecast['dt']
-                else:
+                    start = True
+                    count = 1
+                    self.fcast['uv'] = uv_data[day - 1]['value']
+                elif start:
                     # check for high/low
                     if float(forecast['main']['temp_max']) > self.fcast['temp_max']:
                         self.fcast['temp_max'] = float(forecast['main']['temp_max'])
@@ -248,13 +279,15 @@ class Controller(polyinterface.Controller):
                     if float(forecast['main']['humidity']) < self.fcast['Hmin']:
                         self.fcast['Hmin'] = float(forecast['main']['humidity'])
 
+                    # sum for averages
                     self.fcast['pressure'] += float(forecast['main']['pressure'])
                     self.fcast['speed'] += float(forecast['wind']['speed'])
                     self.fcast['clouds'] += float(forecast['clouds']['all'])
+                    count += 1
+                #else:
 
-                    # sum for averages
 
-                if dt[1] == '21:00:00':
+                if dt[1] == '21:00:00' and start:
                     self.fcast['pressure'] /= 8
                     self.fcast['speed'] /= 8
                     self.fcast['clouds'] /= 8
@@ -264,6 +297,18 @@ class Controller(polyinterface.Controller):
                     #self.nodes[address].update_forecast(forecast, self.latitude, 400, 0.23, self.units)
                     self.nodes[address].update_forecast(self.fcast, self.latitude, 400, 0.23, self.units)
                     day += 1
+                    start = False
+                    count = 0
+
+            if start:
+                LOGGER.info('Partial day forecast ' + str(count))
+                self.fcast['pressure'] /= count
+                self.fcast['speed'] /= count
+                self.fcast['clouds'] /= count
+                LOGGER.info(self.fcast)
+                 # Update the forecast
+                address = 'forecast_' + str(day)
+                self.nodes[address].update_forecast(self.fcast, self.latitude, 400, 0.23, self.units)
 
 
     def query(self):
@@ -327,6 +372,8 @@ class Controller(polyinterface.Controller):
                 if driver['driver'] == 'GV3': driver['uom'] = 4
                 if driver['driver'] == 'GV4': driver['uom'] = 49
                 if driver['driver'] == 'GV5': driver['uom'] = 49
+                if driver['driver'] == 'GV6': driver['uom'] = 82
+                if driver['driver'] == 'GV15': driver['uom'] = 83
             for day in range(1,6):
                 address = 'forecast_' + str(day)
                 self.nodes[address].set_units('metric')
@@ -340,6 +387,8 @@ class Controller(polyinterface.Controller):
                 if driver['driver'] == 'GV3': driver['uom'] = 17
                 if driver['driver'] == 'GV4': driver['uom'] = 48
                 if driver['driver'] == 'GV5': driver['uom'] = 48
+                if driver['driver'] == 'GV6': driver['uom'] = 105
+                if driver['driver'] == 'GV15': driver['uom'] = 116
             for day in range(1,6):
                 address = 'forecast_' + str(day)
                 self.nodes[address].set_units('imperial')
@@ -374,11 +423,9 @@ class Controller(polyinterface.Controller):
             {'driver': 'GV1', 'value': 0, 'uom': 4},       # min temp
             {'driver': 'GV4', 'value': 0, 'uom': 49},      # wind speed
             {'driver': 'GV6', 'value': 0, 'uom': 82},      # rain
-            {'driver': 'GV11', 'value': 0, 'uom': 27},     # climate coverage
-            {'driver': 'GV12', 'value': 0, 'uom': 70},     # climate intensity
             {'driver': 'GV13', 'value': 0, 'uom': 25},     # climate conditions
             {'driver': 'GV14', 'value': 0, 'uom': 22},     # cloud conditions
-            {'driver': 'GV15', 'value': 0, 'uom': 38},     # visibility
+            {'driver': 'GV15', 'value': 0, 'uom': 83},     # visibility
             {'driver': 'GV16', 'value': 0, 'uom': 71},     # UV index
             ]
 

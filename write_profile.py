@@ -24,7 +24,7 @@ uom = {
         48 : 'MPH',
         49 : 'MPS',
         76 : 'DEGREES',
-        0 : 'INCHES',
+        105 : 'INCHES',
         82 : 'MM',
         36 : 'LUMIN',
         56 : 'int',
@@ -40,6 +40,7 @@ uom = {
         24 : 'inhr',
         9 : 'DAY',
         106 : 'ET',
+        83 : 'KM',
         }
 
 index_editor = {

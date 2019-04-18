@@ -68,5 +68,8 @@
     <editor id="ET">
         <range uom="106"  prec="2" />
     </editor>
+    <editor id="KM">
+        <range uom="83"  min="0" max="10000" prec="1" />
+    </editor>
 
 </editors>

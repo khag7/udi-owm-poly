@@ -21,10 +21,11 @@ class DailyNode(polyinterface.Node):
             {'driver': 'GV0', 'value': 0, 'uom': 4},       # high temp
             {'driver': 'GV1', 'value': 0, 'uom': 4},       # low temp
             {'driver': 'CLIHUM', 'value': 0, 'uom': 22},   # humidity
-            {'driver': 'BARPRES', 'value': 0, 'uom': 117}, # pressure
+            {'driver': 'BARPRES', 'value': 0, 'uom': 118}, # pressure
             {'driver': 'GV13', 'value': 0, 'uom': 25},     # conditions
             {'driver': 'GV14', 'value': 0, 'uom': 22},     # clouds
             {'driver': 'GV4', 'value': 0, 'uom': 49},      # wind speed
+            {'driver': 'GV16', 'value': 0, 'uom': 71},     # UV index
             {'driver': 'GV20', 'value': 0, 'uom': 106},    # mm/day
             ]
 
@@ -32,7 +33,7 @@ class DailyNode(polyinterface.Node):
         try:
             for driver in self.drivers:
                 if units == 'imperial':
-                    if driver['driver'] == 'BARPRES': driver['uom'] = 117
+                    if driver['driver'] == 'BARPRES': driver['uom'] = 118
                     if driver['driver'] == 'GV0': driver['uom'] = 17
                     if driver['driver'] == 'GV1': driver['uom'] = 17
                     if driver['driver'] == 'GV19': driver['uom'] = 25
@@ -46,7 +47,7 @@ class DailyNode(polyinterface.Node):
         except:
             for drv in self.drivers:
                 if units == 'imperial':
-                    if drv == 'BARPRES': self.drivers[drv]['uom'] = 117
+                    if drv == 'BARPRES': self.drivers[drv]['uom'] = 118
                     if drv == 'GV0': self.drivers[drv]['uom'] = 17
                     if drv == 'GV1': self.drivers[drv]['uom'] = 17
                     if drv == 'GV19': self.drivers[drv]['uom'] = 25
@@ -70,14 +71,15 @@ class DailyNode(polyinterface.Node):
 
         humidity = (forecast['Hmin'] + forecast['Hmax']) / 2
         self.setDriver('CLIHUM', round(humidity, 0), True, False)
-        self.setDriver('BARPRES', forecast['pressure'], True, False)
-        self.setDriver('GV0', forecast['temp_max'], True, False)
-        self.setDriver('GV1', forecast['temp_min'], True, False)
-        self.setDriver('GV14', forecast['clouds'], True, False)
-        self.setDriver('GV4', forecast['speed'], True, False)
+        self.setDriver('BARPRES', round(forecast['pressure'], 1), True, False)
+        self.setDriver('GV0', round(forecast['temp_max'], 1), True, False)
+        self.setDriver('GV1', round(forecast['temp_min'], 1), True, False)
+        self.setDriver('GV14', round(forecast['clouds'], 0), True, False)
+        self.setDriver('GV4', round(forecast['speed'], 1), True, False)
 
         self.setDriver('GV19', int(dow), True, False)
         self.setDriver('GV13', forecast['weather'], True, False)
+        self.setDriver('GV16', round(forecast['uv'], 1), True, False)
 
         # Calculate ETo
         #  Temp is in degree C and windspeed is in m/s, we may need to
