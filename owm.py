@@ -3,7 +3,13 @@
 Polyglot v2 node server OpenWeatherMap weather data
 Copyright (C) 2018 Robert Paauwe
 """
-import polyinterface
+
+CLOUD = False
+try:
+    import polyinterface
+except ImportError:
+    import pgc_interface as polyinterface
+    CLOUD = True
 import sys
 import time
 import datetime
@@ -64,7 +70,13 @@ class Controller(polyinterface.Controller):
                     if self.units != config['customParams']['Units']:
                         self.units = config['customParams']['Units']
                         changed = True
-                        self.set_driver_units()
+                        try:
+                            if CLOUD:
+                                self.set_cloud_driver_units()
+                            else:
+                                self.set_driver_units()
+                        except:
+                            LOGGER.debug('set driver units failed.')
 
                 self.myConfig = config['customParams']
                 if changed:
@@ -373,7 +385,47 @@ class Controller(polyinterface.Controller):
             self.addNotice("OpenWeatherMap API ID must be set");
             self.configured = False
 
-        self.set_driver_units()
+        if CLOUD:
+            self.set_cloud_driver_units()
+        else:
+            self.set_driver_units()
+
+    def set_cloud_driver_units(self):
+        LOGGER.info('Configure driver units to ' + self.units)
+        if self.uits == 'metric':
+            for drv in self.drivers:
+                if drv == 'CLITEMP': self.drivers[drv]['uom'] = 4
+                if drv == 'DEWPT': self.drivers[drv]['uom'] = 4
+                if drv == 'GV0': self.drivers[drv]['uom'] = 4
+                if drv == 'GV1': self.drivers[drv]['uom'] = 4
+                if drv == 'GV2': self.drivers[drv]['uom'] = 4
+                if drv == 'GV3': self.drivers[drv]['uom'] = 4
+                if drv == 'GV4': self.drivers[drv]['uom'] = 49
+                if drv == 'GV5': self.drivers[drv]['uom'] = 49
+                if drv == 'GV6': self.drivers[drv]['uom'] = 82
+                if drv == 'GV15': self.drivers[drv]['uom'] = 83
+            for day in range(1,6):
+                address = 'forecast_' + str(day)
+                self.nodes[address].set_units('metric')
+        else:  #imperial
+            for drv in self.drivers:
+                if drv == 'CLITEMP': self.drivers[drv]['uom'] = 17
+                if drv == 'DEWPT': self.drivers[drv]['uom'] = 17
+                if drv == 'GV0': self.drivers[drv]['uom'] = 17
+                if drv == 'GV1': self.drivers[drv]['uom'] = 17
+                if drv == 'GV2': self.drivers[drv]['uom'] = 17
+                if drv == 'GV3': self.drivers[drv]['uom'] = 17
+                if drv == 'GV4': self.drivers[drv]['uom'] = 48
+                if drv == 'GV5': self.drivers[drv]['uom'] = 48
+                if drv == 'GV6': self.drivers[drv]['uom'] = 105
+                if drv == 'GV15': self.drivers[drv]['uom'] = 116
+            for day in range(1,6):
+                address = 'forecast_' + str(day)
+                self.nodes[address].set_units('metric')
+
+        # Write out a new node definition file here.
+        write_profile.write_profile(LOGGER, self.drivers, self.nodes['forecast_1'].drivers)
+        self.poly.installprofile()
 
     def set_driver_units(self):
         LOGGER.info('Configure drivers ---')
