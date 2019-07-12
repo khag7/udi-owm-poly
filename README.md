@@ -50,5 +50,7 @@ The nodeserver keeps track of the version number and when a profile rebuild is n
 
 # Release Notes
 
+- 1.0.1 07/12/2019
+   - Fix errors in editor profile file
 - 1.0.0 03/05/2019
    - Initial version published to github
