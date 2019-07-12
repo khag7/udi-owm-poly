@@ -8,7 +8,7 @@
     <editor id="TEMP_F">
         <range uom="17" min="-50" max="150" step="1" prec="1" />
     </editor>
-    <editor id="PRECENT">
+    <editor id="PERCENT">
         <range uom="22" min="0" max="100" prec="0" />
     </editor>
     <editor id="PRESSURE">
@@ -66,10 +66,13 @@
         <range uom="25" min="0" max="6" nls="EN_DAY" />
     </editor>
     <editor id="ET">
-        <range uom="106"  prec="2" />
+        <range uom="106" min="0" max="100" prec="2" />
     </editor>
     <editor id="KM">
         <range uom="83"  min="0" max="10000" prec="1" />
+    </editor>
+    <editor id="MM">
+        <range uom="82"  min="0" max="10000" prec="1" />
     </editor>
 
 </editors>
