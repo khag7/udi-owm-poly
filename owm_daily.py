@@ -28,6 +28,31 @@ class DailyNode(polyinterface.Node):
             {'driver': 'GV16', 'value': 0, 'uom': 71},     # UV index
             {'driver': 'GV20', 'value': 0, 'uom': 106},    # mm/day
             ]
+    uom = {'GV19': 25,
+            'GV0': 4,
+            'GV1': 4,
+            'CLIHUM': 22,
+            'BARPRES': 118,
+            'GV13': 25,
+            'GV14': 22,
+            'GV4': 49,
+            'GV16': 71,
+            'GV20': 107,
+            }
+
+    def set_driver_uom(self, units):
+        if units == 'metric':
+            self.uom['BARPRES'] = 118
+            self.uom['GV0'] = 4
+            self.uom['GV1'] = 4
+            self.uom['GV19'] = 25
+            self.uom['GV4'] = 49
+        elif units == 'imperial':
+            self.uom['BARPRES'] = 118
+            self.uom['GV0'] = 17
+            self.uom['GV1'] = 17
+            self.uom['GV19'] = 25
+            self.uom['GV4'] = 48
 
     def set_units(self, units):
         try:
@@ -70,16 +95,16 @@ class DailyNode(polyinterface.Node):
         LOGGER.info('Day of week = ' + dow)
 
         humidity = (forecast['Hmin'] + forecast['Hmax']) / 2
-        self.setDriver('CLIHUM', round(humidity, 0), True, False)
-        self.setDriver('BARPRES', round(forecast['pressure'], 1), True, False)
-        self.setDriver('GV0', round(forecast['temp_max'], 1), True, False)
-        self.setDriver('GV1', round(forecast['temp_min'], 1), True, False)
-        self.setDriver('GV14', round(forecast['clouds'], 0), True, False)
-        self.setDriver('GV4', round(forecast['speed'], 1), True, False)
+        self.setDriver('CLIHUM', round(humidity, 0), True, False, self.uom['CLIHUM'])
+        self.setDriver('BARPRES', round(forecast['pressure'], 1), True, False, self.uom['BARPRES'])
+        self.setDriver('GV0', round(forecast['temp_max'], 1), True, False, self.uom['GV0'])
+        self.setDriver('GV1', round(forecast['temp_min'], 1), True, False, self.uom['GV1'])
+        self.setDriver('GV14', round(forecast['clouds'], 0), True, False, self.uom['GV14'])
+        self.setDriver('GV4', round(forecast['speed'], 1), True, False, self.uom['GV4'])
 
-        self.setDriver('GV19', int(dow), True, False)
-        self.setDriver('GV13', forecast['weather'], True, False)
-        self.setDriver('GV16', round(forecast['uv'], 1), True, False)
+        self.setDriver('GV19', int(dow), True, False, self.uom['GV19'])
+        self.setDriver('GV13', forecast['weather'], True, False, self.uom['GV13'])
+        self.setDriver('GV16', round(forecast['uv'], 1), True, False, self.uom['GV16'])
 
         # Calculate ETo
         #  Temp is in degree C and windspeed is in m/s, we may need to

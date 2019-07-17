@@ -50,6 +50,10 @@ The nodeserver keeps track of the version number and when a profile rebuild is n
 
 # Release Notes
 
+- 1.1.0 07/17/2019
+   - Rewrite editor profile and node server code to make use of multi-uom
+     editors.  This seems to be a better way to handle switching between
+     imperial and metric units.
 - 1.0.1 07/12/2019
    - Fix errors in editor profile file
 - 1.0.0 03/05/2019

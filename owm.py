@@ -41,6 +41,7 @@ class Controller(polyinterface.Controller):
         self.fcast = {}
         self.plant_type = 0.23
         self.elevation = 0
+        self.uom = {}
 
         self.poly.onConfig(self.process_config)
 
@@ -71,10 +72,7 @@ class Controller(polyinterface.Controller):
                         self.units = config['customParams']['Units']
                         changed = True
                         try:
-                            if CLOUD:
-                                self.set_cloud_driver_units()
-                            else:
-                                self.set_driver_units()
+                            self.set_driver_uom(self.units)
                         except:
                             LOGGER.debug('set driver units failed.')
 
@@ -174,21 +172,21 @@ class Controller(polyinterface.Controller):
 
         # Assume we always get the main section with data
         self.setDriver('CLITEMP', float(jdata['main']['temp']),
-                report=True, force=False)
+                report=True, force=False, uom=self.uom['CLITEMP'])
         self.setDriver('CLIHUM', float(jdata['main']['humidity']),
-                report=True, force=False)
+                report=True, force=False, uom=self.uom['CLIHUM'])
         self.setDriver('BARPRES', float(jdata['main']['pressure']),
-                report=True, force=False)
+                report=True, force=False, uom=self.uom['BARPRES'])
         self.setDriver('GV0', float(jdata['main']['temp_max']),
-                report=True, force=False)
+                report=True, force=False, uom=self.uom['GV0'])
         self.setDriver('GV1', float(jdata['main']['temp_min']),
-                report=True, force=False)
+                report=True, force=False, uom=self.uom['GV1'])
         if 'wind' in jdata:
             self.setDriver('GV4', float(jdata['wind']['speed']),
-                    report=True, force=False)
+                    report=True, force=False, uom=self.uom['GV4'])
             try:
                 self.setDriver('WINDDIR', float(jdata['wind']['deg']),
-                    report=True, force=False)
+                    report=True, force=False, uom=self.uom[''])
             except:
                 LOGGER.debug('missing data for wind direction')
         if 'visibility' in jdata:
@@ -197,23 +195,23 @@ class Controller(polyinterface.Controller):
                 vis = float(jdata['visibility']) / 1000
             else:
                 vis = float(jdata['visibility']) * 0.000621371
-            self.setDriver('GV15', round(vis,1), report=True, force=False)
+            self.setDriver('GV15', round(vis,1), report=True, force=False, uom=self.uom['GV15'])
         if 'rain' in jdata:
             # rain is reported in mm, need to convert to inches
             rain = float(jdata['rain']['3h'])
             if self.units == 'imperial':
                 rain *= 0.0393701
-            self.setDriver('GV6', round(rain, 2), report=True, force=False)
+            self.setDriver('GV6', round(rain, 2), report=True, force=False, uom=self.uom['GV6'])
         else:
-            self.setDriver('GV6', 0, report=True, force=True)
+            self.setDriver('GV6', 0, report=True, force=True, uom=self.uom['GV6'])
         if 'clouds' in jdata:
             self.setDriver('GV14', float(jdata['clouds']['all']),
-                    report=True, force=False)
+                    report=True, force=False, uom=self.uom['GV14'])
         if 'weather' in jdata:
             self.setDriver('GV13', jdata['weather'][0]['id'],
-                    report=True, force=False)
+                    report=True, force=False, uom=self.uom['GV13'])
         
-        self.setDriver('GV16', float(uv_data['value']), True, False)
+        self.setDriver('GV16', float(uv_data['value']), True, False, uom=self.uom['GV16'])
 
     def query_forecast(self):
         # Three hour forecast for 5 days (or about 30 entries). This
@@ -385,84 +383,47 @@ class Controller(polyinterface.Controller):
             self.addNotice("OpenWeatherMap API ID must be set");
             self.configured = False
 
-        if CLOUD:
-            self.set_cloud_driver_units()
+        self.set_driver_uom(self.units)
+
+    # Set the uom dictionary based on current user units preference
+    def set_driver_uom(self, units):
+        LOGGER.info('New Configure driver units to ' + units)
+        if units == 'metric':
+            self.uom['ST'] = 2   # node server status
+            self.uom['CLITEMP'] = 4   # temperature
+            self.uom['CLIHUM'] = 22   # humidity
+            self.uom['BARPRES'] = 118 # pressure
+            self.uom['WINDDIR'] = 76  # direction
+            self.uom['GV0'] = 4       # max temp
+            self.uom['GV1'] = 4       # min temp
+            self.uom['GV4'] = 49      # wind speed
+            self.uom['GV6'] = 82      # rain
+            self.uom['GV13'] = 25     # climate conditions
+            self.uom['GV14'] = 22     # cloud conditions
+            self.uom['GV15'] = 83     # visibility
+            self.uom['GV16'] = 71     # UV index
+
+            for day in range(1,6):
+                address = 'forecast_' + str(day)
+                self.nodes[address].set_driver_uom('metric')
         else:
-            self.set_driver_units()
+            self.uom['ST'] = 2   # node server status
+            self.uom['CLITEMP'] = 17  # temperature
+            self.uom['CLIHUM'] = 22   # humidity
+            self.uom['BARPRES'] = 118 # pressure
+            self.uom['WINDDIR'] = 76  # direction
+            self.uom['GV0'] = 17      # max temp
+            self.uom['GV1'] = 17      # min temp
+            self.uom['GV4'] = 48      # wind speed
+            self.uom['GV6'] = 105     # rain
+            self.uom['GV13'] = 25     # climate conditions
+            self.uom['GV14'] = 22     # cloud conditions
+            self.uom['GV15'] = 116    # visibility
+            self.uom['GV16'] = 71     # UV index
 
-    def set_cloud_driver_units(self):
-        LOGGER.info('Configure driver units to ' + self.units)
-        if self.uits == 'metric':
-            for drv in self.drivers:
-                if drv == 'CLITEMP': self.drivers[drv]['uom'] = 4
-                if drv == 'DEWPT': self.drivers[drv]['uom'] = 4
-                if drv == 'GV0': self.drivers[drv]['uom'] = 4
-                if drv == 'GV1': self.drivers[drv]['uom'] = 4
-                if drv == 'GV2': self.drivers[drv]['uom'] = 4
-                if drv == 'GV3': self.drivers[drv]['uom'] = 4
-                if drv == 'GV4': self.drivers[drv]['uom'] = 49
-                if drv == 'GV5': self.drivers[drv]['uom'] = 49
-                if drv == 'GV6': self.drivers[drv]['uom'] = 82
-                if drv == 'GV15': self.drivers[drv]['uom'] = 83
             for day in range(1,6):
                 address = 'forecast_' + str(day)
-                self.nodes[address].set_units('metric')
-        else:  #imperial
-            for drv in self.drivers:
-                if drv == 'CLITEMP': self.drivers[drv]['uom'] = 17
-                if drv == 'DEWPT': self.drivers[drv]['uom'] = 17
-                if drv == 'GV0': self.drivers[drv]['uom'] = 17
-                if drv == 'GV1': self.drivers[drv]['uom'] = 17
-                if drv == 'GV2': self.drivers[drv]['uom'] = 17
-                if drv == 'GV3': self.drivers[drv]['uom'] = 17
-                if drv == 'GV4': self.drivers[drv]['uom'] = 48
-                if drv == 'GV5': self.drivers[drv]['uom'] = 48
-                if drv == 'GV6': self.drivers[drv]['uom'] = 105
-                if drv == 'GV15': self.drivers[drv]['uom'] = 116
-            for day in range(1,6):
-                address = 'forecast_' + str(day)
-                self.nodes[address].set_units('metric')
-
-        # Write out a new node definition file here.
-        write_profile.write_profile(LOGGER, self.drivers, self.nodes['forecast_1'].drivers)
-        self.poly.installprofile()
-
-    def set_driver_units(self):
-        LOGGER.info('Configure drivers ---')
-        if self.units == 'metric':
-            for driver in self.drivers:
-                if driver['driver'] == 'CLITEMP': driver['uom'] = 4
-                if driver['driver'] == 'DEWPT': driver['uom'] = 4
-                if driver['driver'] == 'GV0': driver['uom'] = 4
-                if driver['driver'] == 'GV1': driver['uom'] = 4
-                if driver['driver'] == 'GV2': driver['uom'] = 4
-                if driver['driver'] == 'GV3': driver['uom'] = 4
-                if driver['driver'] == 'GV4': driver['uom'] = 49
-                if driver['driver'] == 'GV5': driver['uom'] = 49
-                if driver['driver'] == 'GV6': driver['uom'] = 82
-                if driver['driver'] == 'GV15': driver['uom'] = 83
-            for day in range(1,6):
-                address = 'forecast_' + str(day)
-                self.nodes[address].set_units('metric')
-        else:  # imperial
-            for driver in self.drivers:
-                if driver['driver'] == 'CLITEMP': driver['uom'] = 17
-                if driver['driver'] == 'DEWPT': driver['uom'] = 17
-                if driver['driver'] == 'GV0': driver['uom'] = 17
-                if driver['driver'] == 'GV1': driver['uom'] = 17
-                if driver['driver'] == 'GV2': driver['uom'] = 17
-                if driver['driver'] == 'GV3': driver['uom'] = 17
-                if driver['driver'] == 'GV4': driver['uom'] = 48
-                if driver['driver'] == 'GV5': driver['uom'] = 48
-                if driver['driver'] == 'GV6': driver['uom'] = 105
-                if driver['driver'] == 'GV15': driver['uom'] = 116
-            for day in range(1,6):
-                address = 'forecast_' + str(day)
-                self.nodes[address].set_units('imperial')
-
-        # Write out a new node definition file here.
-        write_profile.write_profile(LOGGER, self.drivers, self.nodes['forecast_1'].drivers)
-        self.poly.installprofile()
+                self.nodes[address].set_driver_uom('imperial')
 
     def remove_notices_all(self, command):
         self.removeNoticesAll()
