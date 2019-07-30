@@ -3,7 +3,7 @@
 
 This is a node server to pull weather data from OpenWeatherMaps and make it available to a [Universal Devices ISY994i](https://www.universal-devices.com/residential/ISY) [Polyglot interface](http://www.universal-devices.com/developers/polyglot/docs/) with  [Polyglot V2](https://github.com/Einstein42/udi-polyglotv2)
 
-OpenWeatherMaps requires you to create an API key that you will need to access the data via their API.  See [OpenWeatherMap](http://oopenweathermap.org/api)
+OpenWeatherMaps requires you to create an API key that you will need to access the data via their API.  See [OpenWeatherMap](http://openweathermap.org/api)
 
 (c) 2018 Robert Paauwe
 MIT license.
