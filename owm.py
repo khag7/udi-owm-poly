@@ -113,6 +113,15 @@ class Controller(polyinterface.Controller):
     def shortPoll(self):
         self.query_conditions()
 
+    # Wrap all the setDriver calls so that we can check that the 
+    # value exist first.
+    def update_driver(self, driver, value, uom):
+        try:
+            self.setDriver(driver, float(value), report=True, force=False, uom=uom)
+            #LOGGER.info('setDriver (%s, %f)' %(driver, float(value)))
+        except:
+            LOGGER.debug('Missing data for driver ' + driver)
+
     def query_conditions(self):
         # Query for the current conditions. We can do this fairly
         # frequently, probably as often as once a minute.
@@ -171,47 +180,39 @@ class Controller(polyinterface.Controller):
         LOGGER.debug(jdata)
 
         # Assume we always get the main section with data
-        self.setDriver('CLITEMP', float(jdata['main']['temp']),
-                report=True, force=False, uom=self.uom['CLITEMP'])
-        self.setDriver('CLIHUM', float(jdata['main']['humidity']),
-                report=True, force=False, uom=self.uom['CLIHUM'])
-        self.setDriver('BARPRES', float(jdata['main']['pressure']),
-                report=True, force=False, uom=self.uom['BARPRES'])
-        self.setDriver('GV0', float(jdata['main']['temp_max']),
-                report=True, force=False, uom=self.uom['GV0'])
-        self.setDriver('GV1', float(jdata['main']['temp_min']),
-                report=True, force=False, uom=self.uom['GV1'])
+        self.update_driver('CLITEMP', jdata['main']['temp'], self.uom['CLITEMP'])
+        self.update_driver('CLIHUM', jdata['main']['humidity'], self.uom['CLIHUM'])
+        self.update_driver('BARPRES', jdata['main']['pressure'], self.uom['BARPRES'])
+        self.update_driver('GV0', jdata['main']['temp_max'], self.uom['GV0'])
+        self.update_driver('GV1', jdata['main']['temp_min'], self.uom['GV1'])
         if 'wind' in jdata:
-            self.setDriver('GV4', float(jdata['wind']['speed']),
-                    report=True, force=False, uom=self.uom['GV4'])
-            try:
-                self.setDriver('WINDDIR', float(jdata['wind']['deg']),
-                    report=True, force=False, uom=self.uom[''])
-            except:
-                LOGGER.debug('missing data for wind direction')
+            self.update_driver('GV4', jdata['wind']['speed'], self.uom['GV4'])
+            self.update_driver('WINDDIR', jdata['wind']['deg'], self.uom['WINDDIR'])
         if 'visibility' in jdata:
             # always reported in meters convert to either km or miles
             if self.units == 'metric':
                 vis = float(jdata['visibility']) / 1000
             else:
                 vis = float(jdata['visibility']) * 0.000621371
-            self.setDriver('GV15', round(vis,1), report=True, force=False, uom=self.uom['GV15'])
+            self.update_driver('GV15', round(vis,1), self.uom['GV15'])
         if 'rain' in jdata:
             # rain is reported in mm, need to convert to inches
-            rain = float(jdata['rain']['3h'])
+            if '3h' in jdata['rain']:
+                rain = float(jdata['rain']['3h'])
+            else:
+                rain = 0
             if self.units == 'imperial':
                 rain *= 0.0393701
-            self.setDriver('GV6', round(rain, 2), report=True, force=False, uom=self.uom['GV6'])
         else:
-            self.setDriver('GV6', 0, report=True, force=True, uom=self.uom['GV6'])
+            rain = 0
+        self.update_driver('GV6', round(rain, 2), self.uom['GV6'])
+
         if 'clouds' in jdata:
-            self.setDriver('GV14', float(jdata['clouds']['all']),
-                    report=True, force=False, uom=self.uom['GV14'])
+            self.update_driver('GV14', jdata['clouds']['all'], self.uom['GV14'])
         if 'weather' in jdata:
-            self.setDriver('GV13', jdata['weather'][0]['id'],
-                    report=True, force=False, uom=self.uom['GV13'])
+            self.update_driver('GV13', jdata['weather'][0]['id'], self.uom['GV13'])
         
-        self.setDriver('GV16', float(uv_data['value']), True, False, uom=self.uom['GV16'])
+        self.update_driver('GV16', uv_data['value'], self.uom['GV16'])
 
     def query_forecast(self):
         # Three hour forecast for 5 days (or about 30 entries). This
