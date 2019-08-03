@@ -50,6 +50,9 @@ The nodeserver keeps track of the version number and when a profile rebuild is n
 
 # Release Notes
 
+- 1.2.0 08/03/2019
+   - Add some additional error checking to queried values
+   - Allow for city, lat/long location specifiers in configuration
 - 1.1.1 07/30/2019
    - Fix condition codes editor entry and NSL entries.
 - 1.1.0 07/17/2019
