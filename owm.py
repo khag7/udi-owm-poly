@@ -16,6 +16,7 @@ import datetime
 import urllib3
 import socket
 import math
+import re
 import json
 import write_profile
 import owm_daily
@@ -130,8 +131,12 @@ class Controller(polyinterface.Controller):
         # http://api.openweathermap.org/data/2.5/weather?
 
         request = 'http://api.openweathermap.org/data/2.5/weather?'
-        # TODO: handle other methods of setting location
-        request += 'zip=' + self.location
+        # if location looks like a zip code, treat it as such for backwards
+        # compatibility
+        if re.fullmatch(r'\d\d\d\d\d,..', self.location) != None:
+            request += 'zip=' + self.location
+        else:
+            request += self.location
         request += '&units=' + self.units
         request += '&appid=' + self.apikey
 
@@ -221,8 +226,12 @@ class Controller(polyinterface.Controller):
         # to pick one of the entries for the day and just use that?
 
         request = 'http://api.openweathermap.org/data/2.5/forecast?'
-        # TODO: handle other methods of setting location
-        request += 'zip=' + self.location
+        # if location looks like a zip code, treat it as such for backwards
+        # compatibility
+        if re.fullmatch(r'\d\d\d\d\d,..', self.location) != None:
+            request += 'zip=' + self.location
+        else:
+            request += self.location
         request += '&units=' + self.units
         request += '&appid=' + self.apikey
 
