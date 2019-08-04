@@ -135,6 +135,8 @@ class Controller(polyinterface.Controller):
         # compatibility
         if re.fullmatch(r'\d\d\d\d\d,..', self.location) != None:
             request += 'zip=' + self.location
+        elif re.fullmatch(r'\d\d\d\d\d', self.location) != None:
+            request += 'zip=' + self.location
         else:
             request += self.location
         request += '&units=' + self.units
@@ -229,6 +231,8 @@ class Controller(polyinterface.Controller):
         # if location looks like a zip code, treat it as such for backwards
         # compatibility
         if re.fullmatch(r'\d\d\d\d\d,..', self.location) != None:
+            request += 'zip=' + self.location
+        elif re.fullmatch(r'\d\d\d\d\d', self.location) != None:
             request += 'zip=' + self.location
         else:
             request += self.location
