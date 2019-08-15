@@ -50,6 +50,8 @@ The nodeserver keeps track of the version number and when a profile rebuild is n
 
 # Release Notes
 
+- 1.2.2 08/15/2019
+   - Improve error checkin, specifically for wind direction.
 - 1.2.1 08/03/2019
    - Allow zipcode without country code for backwards compatibility
 - 1.2.0 08/03/2019
