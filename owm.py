@@ -163,10 +163,13 @@ class Controller(polyinterface.Controller):
         # Only query by lat/lon so need to pull that from jdata
         request += '&lat=' + str(jdata['coord']['lat'])
         request += '&lon=' + str(jdata['coord']['lon'])
-        c = http.request('GET', request)
-        uv_data = json.loads(c.data.decode('utf-8'))
-        c.close()
-        LOGGER.debug('UV index = %f' % uv_data['value'])
+        try:
+            c = http.request('GET', request)
+            uv_data = json.loads(c.data.decode('utf-8'))
+            c.close()
+            LOGGER.debug('UV index = %f' % uv_data['value'])
+        except:
+            LOGGER.debug('UV data is not valid.')
 
         # for kicks, lets try getting pollution info
         request = 'http://api.openweathermap.org/pollution/v1/co/'
@@ -176,10 +179,13 @@ class Controller(polyinterface.Controller):
         request += 'appid=' + self.apikey
         # Only query by lat/lon so need to pull that from jdata
         LOGGER.debug(request)
-        c = http.request('GET', request)
-        pollution_data = json.loads(c.data.decode('utf-8'))
-        c.close()
-        LOGGER.debug(pollution_data)
+        try:
+            c = http.request('GET', request)
+            pollution_data = json.loads(c.data.decode('utf-8'))
+            c.close()
+            LOGGER.debug(pollution_data)
+        except:
+            LOGGER.debug('polution data is not valid')
 
         http.clear()
 
@@ -193,8 +199,11 @@ class Controller(polyinterface.Controller):
         self.update_driver('GV0', jdata['main']['temp_max'], self.uom['GV0'])
         self.update_driver('GV1', jdata['main']['temp_min'], self.uom['GV1'])
         if 'wind' in jdata:
-            self.update_driver('GV4', jdata['wind']['speed'], self.uom['GV4'])
-            self.update_driver('WINDDIR', jdata['wind']['deg'], self.uom['WINDDIR'])
+            # Wind data is apparently flaky so check to make sure it exist.
+            if 'speed' in jdata['wind']:
+                self.update_driver('GV4', jdata['wind']['speed'], self.uom['GV4'])
+            if 'deg' in jdata['wind']:
+                self.update_driver('WINDDIR', jdata['wind']['deg'], self.uom['WINDDIR'])
         if 'visibility' in jdata:
             # always reported in meters convert to either km or miles
             if self.units == 'metric':
