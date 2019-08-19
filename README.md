@@ -50,6 +50,8 @@ The nodeserver keeps track of the version number and when a profile rebuild is n
 
 # Release Notes
 
+- 1.2.3 08/19/2019
+   - Add error check on forecast UV data.
 - 1.2.2 08/15/2019
    - Improve error checkin, specifically for wind direction.
 - 1.2.1 08/03/2019
