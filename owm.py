@@ -310,7 +310,10 @@ class Controller(polyinterface.Controller):
                     self.fcast['dt'] = forecast['dt']
                     start = True
                     count = 1
-                    self.fcast['uv'] = uv_data[day - 1]['value']
+                    try:
+                        self.fcast['uv'] = uv_data[day - 1]['value']
+                    except:
+                        self.fcast['uv'] = 0
                 elif start:
                     # check for high/low
                     if float(forecast['main']['temp_max']) > self.fcast['temp_max']:
