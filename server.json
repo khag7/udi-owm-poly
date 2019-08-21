@@ -13,8 +13,8 @@
     "credits": [ {
 	"title": "OpenWeatherMap: A node server for weather data",
     	"author": "Bob Paauwe",
-    	"version": "1.2.3",
-    	"date": "August 19, 2019",
+    	"version": "1.2.4",
+    	"date": "August 20, 2019",
     	"source": "https://github.com/bpaauwe/udi-owm-poly",
 	"license": "https://github.com/bpaauwe/udi-owm-poly/LICENSE"
 	} ]
