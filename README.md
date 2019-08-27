@@ -50,6 +50,8 @@ The nodeserver keeps track of the version number and when a profile rebuild is n
 
 # Release Notes
 
+- 1.2.5 08/27/2019
+   - Fix use of uninitialized uv data.
 - 1.2.4 08/20/2019
    - Add error check on location data.
 - 1.2.3 08/19/2019
