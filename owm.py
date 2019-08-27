@@ -160,6 +160,8 @@ class Controller(polyinterface.Controller):
             self.longitude = jdata['coord']['lon']
 
             # Query UV index data
+            #  TODO: Maybe move the query and driver update to a separate
+            #        function?
             request = 'http://api.openweathermap.org/data/2.5/uvi?'
             request += 'appid=' + self.apikey
             # Only query by lat/lon so need to pull that from jdata
@@ -170,10 +172,13 @@ class Controller(polyinterface.Controller):
                 uv_data = json.loads(c.data.decode('utf-8'))
                 c.close()
                 LOGGER.debug('UV index = %f' % uv_data['value'])
+                self.update_driver('GV16', uv_data['value'], self.uom['GV16'])
             except:
                 LOGGER.debug('UV data is not valid.')
+                uv_data['value'] = 0
 
             # for kicks, lets try getting pollution info
+            #  TODO: Maybe move query to separate function?
             request = 'http://api.openweathermap.org/pollution/v1/co/'
             request += str(jdata['coord']['lat']) + ','
             request += str(jdata['coord']['lon'])
@@ -234,7 +239,6 @@ class Controller(polyinterface.Controller):
         if 'weather' in jdata:
             self.update_driver('GV13', jdata['weather'][0]['id'], self.uom['GV13'])
         
-        self.update_driver('GV16', uv_data['value'], self.uom['GV16'])
 
     def query_forecast(self):
         # Three hour forecast for 5 days (or about 30 entries). This
