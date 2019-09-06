@@ -275,8 +275,12 @@ class Controller(polyinterface.Controller):
         # Only query by lat/lon so need to pull that from jdata
         request += '&lat=' + str(self.latitude)
         request += '&lon=' + str(self.longitude)
-        c = http.request('GET', request)
-        uv_data = json.loads(c.data.decode('utf-8'))
+        try:
+            c = http.request('GET', request)
+            uv_data = json.loads(c.data.decode('utf-8'))
+        except:
+            LOGGER.debug('UV data is not valid.')
+            uv_data['value'] = 0
         c.close()
         #LOGGER.debug(uv_data)
 
