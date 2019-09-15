@@ -280,7 +280,6 @@ class Controller(polyinterface.Controller):
             uv_data = json.loads(c.data.decode('utf-8'))
         except:
             LOGGER.debug('UV data is not valid.')
-            uv_data['value'] = 0
         c.close()
         #LOGGER.debug(uv_data)
 
