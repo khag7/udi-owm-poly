@@ -148,55 +148,59 @@ class Controller(polyinterface.Controller):
             LOGGER.info('Skipping connection because we aren\'t configured yet.')
             return
 
-        http = urllib3.PoolManager()
-        c = http.request('GET', request)
-        wdata = c.data
-        jdata = json.loads(wdata.decode('utf-8'))
-        c.close()
-        LOGGER.debug(jdata)
-
         try:
-            self.latitude = jdata['coord']['lat']
-            self.longitude = jdata['coord']['lon']
+            http = urllib3.PoolManager()
+            c = http.request('GET', request)
+            wdata = c.data
+            jdata = json.loads(wdata.decode('utf-8'))
+            c.close()
+            LOGGER.debug(jdata)
 
-            # Query UV index data
-            #  TODO: Maybe move the query and driver update to a separate
-            #        function?
-            request = 'http://api.openweathermap.org/data/2.5/uvi?'
-            request += 'appid=' + self.apikey
-            # Only query by lat/lon so need to pull that from jdata
-            request += '&lat=' + str(jdata['coord']['lat'])
-            request += '&lon=' + str(jdata['coord']['lon'])
             try:
-                c = http.request('GET', request)
-                uv_data = json.loads(c.data.decode('utf-8'))
-                c.close()
-                LOGGER.debug('UV index = %f' % uv_data['value'])
-                self.update_driver('GV16', uv_data['value'], self.uom['GV16'])
-            except:
-                LOGGER.debug('UV data is not valid.')
-                uv_data['value'] = 0
+                self.latitude = jdata['coord']['lat']
+                self.longitude = jdata['coord']['lon']
 
-            # for kicks, lets try getting pollution info
-            #  TODO: Maybe move query to separate function?
-            request = 'http://api.openweathermap.org/pollution/v1/co/'
-            request += str(jdata['coord']['lat']) + ','
-            request += str(jdata['coord']['lon'])
-            request += '/current.json?'
-            request += 'appid=' + self.apikey
-            # Only query by lat/lon so need to pull that from jdata
-            LOGGER.debug(request)
-            try:
-                c = http.request('GET', request)
-                pollution_data = json.loads(c.data.decode('utf-8'))
-                c.close()
-                LOGGER.debug(pollution_data)
-            except:
-                LOGGER.debug('pollution data is not valid')
+                # Query UV index data
+                #  TODO: Maybe move the query and driver update to a separate
+                #        function?
+                request = 'http://api.openweathermap.org/data/2.5/uvi?'
+                request += 'appid=' + self.apikey
+                # Only query by lat/lon so need to pull that from jdata
+                request += '&lat=' + str(jdata['coord']['lat'])
+                request += '&lon=' + str(jdata['coord']['lon'])
+                try:
+                    c = http.request('GET', request)
+                    uv_data = json.loads(c.data.decode('utf-8'))
+                    c.close()
+                    LOGGER.debug('UV index = %f' % uv_data['value'])
+                    self.update_driver('GV16', uv_data['value'], self.uom['GV16'])
+                except:
+                    LOGGER.debug('UV data is not valid.')
+                    uv_data['value'] = 0
 
-            http.clear()
+                # for kicks, lets try getting pollution info
+                #  TODO: Maybe move query to separate function?
+                request = 'http://api.openweathermap.org/pollution/v1/co/'
+                request += str(jdata['coord']['lat']) + ','
+                request += str(jdata['coord']['lon'])
+                request += '/current.json?'
+                request += 'appid=' + self.apikey
+                # Only query by lat/lon so need to pull that from jdata
+                LOGGER.debug(request)
+                try:
+                    c = http.request('GET', request)
+                    pollution_data = json.loads(c.data.decode('utf-8'))
+                    c.close()
+                    LOGGER.debug(pollution_data)
+                except:
+                    LOGGER.debug('pollution data is not valid')
+
+                http.clear()
+            except:
+                LOGGER.debug('Skipping UV and Pollution data, no location info')
         except:
-            LOGGER.debug('Skipping UV and Pollution data, no location info')
+            LOGGER.error('Weather data query failed')
+            return
 
         # Should we check that jdata actually has something in it?
         if jdata == None:
@@ -264,26 +268,30 @@ class Controller(polyinterface.Controller):
             LOGGER.info('Skipping connection because we aren\'t configured yet.')
             return
 
-        http = urllib3.PoolManager()
-        c = http.request('GET', request)
-        wdata = c.data
-        c.close()
-
-        # query UV forecast
-        request = 'http://api.openweathermap.org/data/2.5/uvi/forecast?'
-        request += 'appid=' + self.apikey
-        # Only query by lat/lon so need to pull that from jdata
-        request += '&lat=' + str(self.latitude)
-        request += '&lon=' + str(self.longitude)
         try:
+            http = urllib3.PoolManager()
             c = http.request('GET', request)
-            uv_data = json.loads(c.data.decode('utf-8'))
-        except:
-            LOGGER.debug('UV data is not valid.')
-        c.close()
-        #LOGGER.debug(uv_data)
+            wdata = c.data
+            c.close()
 
-        http.clear()
+            # query UV forecast
+            request = 'http://api.openweathermap.org/data/2.5/uvi/forecast?'
+            request += 'appid=' + self.apikey
+            # Only query by lat/lon so need to pull that from jdata
+            request += '&lat=' + str(self.latitude)
+            request += '&lon=' + str(self.longitude)
+            try:
+                c = http.request('GET', request)
+                uv_data = json.loads(c.data.decode('utf-8'))
+            except:
+                LOGGER.debug('UV data is not valid.')
+            c.close()
+            #LOGGER.debug(uv_data)
+
+            http.clear()
+        except:
+            LOGGER.error('Forecast data query failed.')
+            return
 
         jdata = json.loads(wdata.decode('utf-8'))
 
