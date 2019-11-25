@@ -50,6 +50,8 @@ The nodeserver keeps track of the version number and when a profile rebuild is n
 
 # Release Notes
 
+- 1.2.8 11/25/2019
+   - Trap failures in http requests.
 - 1.2.7 09/15/2019
    - Fix use of uninitalized uv data when no uv data exist.
 - 1.2.6 09/06/2019
