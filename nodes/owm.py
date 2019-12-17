@@ -18,6 +18,7 @@ import re
 import json
 import node_funcs
 from nodes import owm_daily
+from nodes import uom
 
 LOGGER = polyinterface.LOGGER
 
