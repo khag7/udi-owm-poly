@@ -34,17 +34,6 @@ class Controller(polyinterface.Controller):
         self.primary = self.address
         self.configured = False
 
-        #self.location = ''
-        #self.apikey = ''
-        #self.units = 'metric'
-        #self.myConfig = {}
-        #self.latitude = 0
-        #self.longitude = 0
-        #self.fcast = {}
-        #self.plant_type = 0.23
-        #self.elevation = 0
-        #self.uom = {}
-
         self.params = node_funcs.NSParameters([{
             'name': 'APIkey',
             'default': 'set me',
@@ -59,7 +48,7 @@ class Controller(polyinterface.Controller):
             },
             {
             'name': 'Units',
-            'default': 'us',
+            'default': 'imperial',
             'isRequired': False,
             'notice': '',
             },
@@ -145,6 +134,8 @@ class Controller(polyinterface.Controller):
         except:
             LOGGER.error('HTTP request failed for api.openweathermap.org')
             jdata = None
+
+        return jdata
 
 
     def query_conditions(self, force=False):
