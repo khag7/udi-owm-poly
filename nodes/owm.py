@@ -237,7 +237,7 @@ class Controller(polyinterface.Controller):
         # Free accounts only give us a 3hr/5day forecast so the first step
         # is to map into days with min/max values.
         fcast = []
-        LOGGER.info('Forecast has ' + jdata['cnt'] + ' lines of data')
+        LOGGER.info('Forecast has ' + str(jdata['cnt']) + ' lines of data')
         day = 0
         fcast[day] = {}
         if 'list' in jdata:
