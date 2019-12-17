@@ -26,8 +26,8 @@ ST-ctl-GV11-NAME = Climate Coverage
 ST-ctl-GV12-NAME = Climate Intensity
 ST-ctl-GV13-NAME = Climate Conditions
 ST-ctl-GV14-NAME = Cloud Conditions
-ST-ctl-GV15-NAME = Visibility
-ST-ctl-GV16-NAME = UV Index
+ST-ctl-DISTANC-NAME = Visibility
+ST-ctl-UV-NAME = UV Index
 ST-ctl-GV17-NAME = Ozone
 ST-ctl-GV18-NAME = Chance of Rain
 ST-ctl-GV19-NAME = Day
@@ -35,6 +35,13 @@ ST-ctl-GV20-NAME = Evapotranspiration
 
 ND-daily-NAME = Daily Forecast
 ND-daily-ICON = Weather
+
+DBG-0 = Off
+DBG-10 = Debug
+DBG-20 = Info
+DBG-30 = Warning
+DBG-40 = Error
+DBG-50 = Critical
 
 EN_RAINTYPE-0 = None
 EN_RAINTYPE-1 = Rain
