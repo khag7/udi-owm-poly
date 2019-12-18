@@ -196,14 +196,20 @@ class Controller(polyinterface.Controller):
             self.update_driver('DISTANC', round(vis,1), force)
         if 'rain' in jdata:
             # rain is reported in mm, need to convert to inches
+            LOGGER.debug('Rain data = ' + jdata['rain'])
             if '3h' in jdata['rain']:
                 rain = float(jdata['rain']['3h'])
+                LOGGER.debug('Found rain value = ' + str(rain))
+            elif '1h' in jdata['rain']:
+                rain = float(jdata['rain']['1h'])
+                LOGGER.debug('Found rain value = ' + str(rain))
             else:
                 rain = 0
             if self.params.get('Units') == 'imperial':
                 rain *= 0.0393701
         else:
             rain = 0
+        LOGGER
         self.update_driver('GV6', round(rain, 2), force)
 
         if 'clouds' in jdata:
