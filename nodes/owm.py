@@ -260,10 +260,11 @@ class Controller(polyinterface.Controller):
                             }
                 elif dt[1] == '00:00:00':
                     # calculate averages for previous day
-                    fcast[day]['pressure'] /= count
-                    fcast[day]['speed'] /= count
-                    fcast[day]['deg'] /= count
-                    fcast[day]['clouds'] /= count
+                    f = fcast[day]
+                    f['pressure'] /= count
+                    f['speed'] /= count
+                    f['deg'] /= count
+                    f['clouds'] /= count
 
                     day += 1
                     fcast[day] = {
@@ -282,20 +283,21 @@ class Controller(polyinterface.Controller):
                     count = 0
                 else:
                     # update min/max averages
-                    if float(forecast['main']['temp']) > fcast[day]['temp_max']:
-                        fcast[day]['temp_max'] = float(forecast['main']['temp'])
-                    if float(forecast['main']['temp']) < fcast['temp_min']:
-                        fcast[day]['temp_min'] = float(forecast['main']['temp'])
-                    if float(forecast['main']['humidity']) > fcast[day]['Hmax']:
-                        fcast[day]['Hmax'] = float(forecast['main']['humidity'])
-                    if float(forecast['main']['humidity']) < fcast[day]['Hmin']:
-                        fcast[day]['Hmin'] = float(forecast['main']['humidity'])
+                    f = fcast[day]
+                    if float(forecast['main']['temp']) > f['temp_max']:
+                        f['temp_max'] = float(forecast['main']['temp'])
+                    if float(forecast['main']['temp']) < f['temp_min']:
+                        f['temp_min'] = float(forecast['main']['temp'])
+                    if float(forecast['main']['humidity']) > f['Hmax']:
+                        f['Hmax'] = float(forecast['main']['humidity'])
+                    if float(forecast['main']['humidity']) < f['Hmin']:
+                        f['Hmin'] = float(forecast['main']['humidity'])
 
                     # sum for averages
-                    fcast[day]['pressure'] += float(forecast['main']['pressure'])
-                    fcast[day]['speed'] += float(forecast['wind']['speed'])
-                    fcast[day]['winddir'] += float(forecast['wind']['deg'])
-                    fcast[day]['clouds'] += float(forecast['clouds']['all'])
+                    f['pressure'] += float(forecast['main']['pressure'])
+                    f['speed'] += float(forecast['wind']['speed'])
+                    f['winddir'] += float(forecast['wind']['deg'])
+                    f['clouds'] += float(forecast['clouds']['all'])
                     count += 1
             LOGGER.info('Created ' + str(day) +' days forecast.')
 
