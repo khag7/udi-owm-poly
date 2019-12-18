@@ -239,12 +239,26 @@ class Controller(polyinterface.Controller):
         fcast = []
         LOGGER.info('Forecast has ' + str(jdata['cnt']) + ' lines of data')
         day = 0
-        fcast[day] = {}
+        fcast.append({})
         if 'list' in jdata:
             for forecast in jdata['list']:
                 dt = forecast['dt_txt'].split(' ')
                 # check for start of new day
-                if dt[1] == '00:00:00':
+                if fcast[day] == {}:
+                    fcast[day] = {
+                            'temp_max', float(forecast['main']['temp']),
+                            'temp_min', float(forecast['main']['temp']),
+                            'Hmax', float(forecast['main']['humidity']),
+                            'Hmin', float(forecast['main']['humidity']),
+                            'pressure', float(forecast['main']['pressure']),
+                            'weather', float(forecast['main'][0]['id']),
+                            'speed', float(forecast['wind']['speed']),
+                            'winddir', float(forecast['wind']['deg']),
+                            'clouds', float(forecast['clouds']['all']),
+                            'dt', forecast['dt'],
+                            'uv', float(uv_data[day]['value']),
+                            }
+                elif dt[1] == '00:00:00':
                     # calculate averages for previous day
                     fcast[day]['pressure'] /= count
                     fcast[day]['speed'] /= count
@@ -266,20 +280,6 @@ class Controller(polyinterface.Controller):
                             'uv', float(uv_data[day]['value']),
                             }
                     count = 0
-                elif fcast[day] == {}:
-                    fcast[day] = {
-                            'temp_max', float(forecast['main']['temp']),
-                            'temp_min', float(forecast['main']['temp']),
-                            'Hmax', float(forecast['main']['humidity']),
-                            'Hmin', float(forecast['main']['humidity']),
-                            'pressure', float(forecast['main']['pressure']),
-                            'weather', float(forecast['main'][0]['id']),
-                            'speed', float(forecast['wind']['speed']),
-                            'winddir', float(forecast['wind']['deg']),
-                            'clouds', float(forecast['clouds']['all']),
-                            'dt', forecast['dt'],
-                            'uv', float(uv_data[day]['value']),
-                            }
                 else:
                     # update min/max averages
                     if float(forecast['main']['temp']) > fcast[day]['temp_max']:
