@@ -230,9 +230,6 @@ class Controller(polyinterface.Controller):
                 return
 
             uv_data = self.get_weather_data('uvi/forecast', self.latitude, self.longitude)
-            for u in uv_data:
-                LOGGER.info('UV Forecast for ' + u['date'] + ' = ' + u['value'])
-
         except:
             LOGGER.error('Foreast query failed.')
             return
@@ -272,7 +269,7 @@ class Controller(polyinterface.Controller):
                     f['clouds'] /= count
 
                     day += 1
-                    fcast[day] = {
+                    fcast.append({
                             'temp_max': float(forecast['main']['temp']),
                             'temp_min': float(forecast['main']['temp']),
                             'Hmax': float(forecast['main']['humidity']),
@@ -284,7 +281,7 @@ class Controller(polyinterface.Controller):
                             'clouds': float(forecast['clouds']['all']),
                             'dt': forecast['dt'],
                             'uv': float(uv_data[day]['value']),
-                            }
+                            })
                     count = 0
                 else:
                     # update min/max averages
@@ -306,7 +303,7 @@ class Controller(polyinterface.Controller):
                     count += 1
             LOGGER.info('Created ' + str(day) +' days forecast.')
 
-            for f in range(0,self.params.get('Forecast Days')):
+            for f in range(0,int(self.params.get('Forecast Days'))):
                 address = 'forecast_' + str(f)
                 self.nodes[address].update_forecast(fcast[f], self.latitude, self.params.get('Elevation'), self.params.get('Plant Type'), self.params.get('Units'))
 
