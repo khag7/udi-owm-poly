@@ -230,6 +230,9 @@ class Controller(polyinterface.Controller):
                 return
 
             uv_data = self.get_weather_data('uvi/forecast', self.latitude, self.longitude)
+            for u in uv_data:
+                LOGGER.info('UV Forecast for ' + u['date'] + ' = ' + u['value'])
+
         except:
             LOGGER.error('Foreast query failed.')
             return
@@ -243,6 +246,7 @@ class Controller(polyinterface.Controller):
         if 'list' in jdata:
             for forecast in jdata['list']:
                 dt = forecast['dt_txt'].split(' ')
+                LOGGER.info('Day = ' + str(day) + ' - Forecast dt = ' + forecast['dt'])
                 # check for start of new day
                 if fcast[day] == {}:
                     fcast[day] = {
