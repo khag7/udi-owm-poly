@@ -263,10 +263,11 @@ class Controller(polyinterface.Controller):
                 elif dt[1] == '00:00:00':
                     # calculate averages for previous day
                     f = fcast[day]
-                    f['pressure'] /= count
-                    f['speed'] /= count
-                    f['winddir'] /= count
-                    f['clouds'] /= count
+                    if count > 0:
+                        f['pressure'] /= count
+                        f['speed'] /= count
+                        f['winddir'] /= count
+                        f['clouds'] /= count
 
                     day += 1
                     fcast.append({
