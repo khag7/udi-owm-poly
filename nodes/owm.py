@@ -264,7 +264,7 @@ class Controller(polyinterface.Controller):
                     f = fcast[day]
                     f['pressure'] /= count
                     f['speed'] /= count
-                    f['deg'] /= count
+                    f['winddir'] /= count
                     f['clouds'] /= count
 
                     day += 1
