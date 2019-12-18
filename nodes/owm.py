@@ -243,7 +243,7 @@ class Controller(polyinterface.Controller):
         if 'list' in jdata:
             for forecast in jdata['list']:
                 dt = forecast['dt_txt'].split(' ')
-                LOGGER.info('Day = ' + str(day) + ' - Forecast dt = ' + forecast['dt'])
+                LOGGER.info('Day = ' + str(day) + ' - Forecast dt = ' + str(forecast['dt']))
                 # check for start of new day
                 if fcast[day] == {}:
                     fcast[day] = {
