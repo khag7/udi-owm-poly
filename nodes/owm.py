@@ -246,17 +246,17 @@ class Controller(polyinterface.Controller):
                 # check for start of new day
                 if fcast[day] == {}:
                     fcast[day] = {
-                            'temp_max', float(forecast['main']['temp']),
-                            'temp_min', float(forecast['main']['temp']),
-                            'Hmax', float(forecast['main']['humidity']),
-                            'Hmin', float(forecast['main']['humidity']),
-                            'pressure', float(forecast['main']['pressure']),
-                            'weather', float(forecast['weather'][0]['id']),
-                            'speed', float(forecast['wind']['speed']),
-                            'winddir', float(forecast['wind']['deg']),
-                            'clouds', float(forecast['clouds']['all']),
-                            'dt', forecast['dt'],
-                            'uv', float(uv_data[day]['value']),
+                            'temp_max': float(forecast['main']['temp']),
+                            'temp_min': float(forecast['main']['temp']),
+                            'Hmax': float(forecast['main']['humidity']),
+                            'Hmin': float(forecast['main']['humidity']),
+                            'pressure': float(forecast['main']['pressure']),
+                            'weather': float(forecast['weather'][0]['id']),
+                            'speed': float(forecast['wind']['speed']),
+                            'winddir': float(forecast['wind']['deg']),
+                            'clouds': float(forecast['clouds']['all']),
+                            'dt': forecast['dt'],
+                            'uv': float(uv_data[day]['value']),
                             }
                 elif dt[1] == '00:00:00':
                     # calculate averages for previous day
@@ -268,17 +268,17 @@ class Controller(polyinterface.Controller):
 
                     day += 1
                     fcast[day] = {
-                            'temp_max', float(forecast['main']['temp']),
-                            'temp_min', float(forecast['main']['temp']),
-                            'Hmax', float(forecast['main']['humidity']),
-                            'Hmin', float(forecast['main']['humidity']),
-                            'pressure', float(forecast['main']['pressure']),
-                            'weather', float(forecast['weather'][0]['id']),
-                            'speed', float(forecast['wind']['speed']),
-                            'winddir', float(forecast['wind']['deg']),
-                            'clouds', float(forecast['clouds']['all']),
-                            'dt', forecast['dt'],
-                            'uv', float(uv_data[day]['value']),
+                            'temp_max': float(forecast['main']['temp']),
+                            'temp_min': float(forecast['main']['temp']),
+                            'Hmax': float(forecast['main']['humidity']),
+                            'Hmin': float(forecast['main']['humidity']),
+                            'pressure': float(forecast['main']['pressure']),
+                            'weather': float(forecast['weather'][0]['id']),
+                            'speed': float(forecast['wind']['speed']),
+                            'winddir': float(forecast['wind']['deg']),
+                            'clouds': float(forecast['clouds']['all']),
+                            'dt': forecast['dt'],
+                            'uv': float(uv_data[day]['value']),
                             }
                     count = 0
                 else:
