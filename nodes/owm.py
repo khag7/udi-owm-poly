@@ -258,6 +258,7 @@ class Controller(polyinterface.Controller):
                             'dt': forecast['dt'],
                             'uv': float(uv_data[day]['value']),
                             }
+                    count = 0
                 elif dt[1] == '00:00:00':
                     # calculate averages for previous day
                     f = fcast[day]
