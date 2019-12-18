@@ -200,7 +200,7 @@ class Controller(polyinterface.Controller):
                 rain = float(jdata['rain']['3h'])
             else:
                 rain = 0
-            if self.units == 'imperial':
+            if self.params.get('Units') == 'imperial':
                 rain *= 0.0393701
         else:
             rain = 0
