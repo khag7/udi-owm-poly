@@ -196,7 +196,6 @@ class Controller(polyinterface.Controller):
             self.update_driver('DISTANC', round(vis,1), force)
         if 'rain' in jdata:
             # rain is reported in mm, need to convert to inches
-            LOGGER.debug('Rain data = ' + jdata['rain'])
             if '3h' in jdata['rain']:
                 rain = float(jdata['rain']['3h'])
                 LOGGER.debug('Found rain value = ' + str(rain))
