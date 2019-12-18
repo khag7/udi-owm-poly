@@ -42,9 +42,8 @@ class DailyNode(polyinterface.Node):
             }
 
     def set_driver_uom(self, units):
-        if units == 'metric':
-            self.uom = uom.get_uom(units)
-            self.units = units
+        self.uom = uom.get_uom(units)
+        self.units = units
 
     def mm2inch(self, mm):
         return mm/25.4
