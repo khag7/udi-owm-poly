@@ -127,8 +127,11 @@ class Controller(polyinterface.Controller):
 
         LOGGER.debug('request = %s' % request)
         try:
+            LOGGER.info('making request')
             c = requests.get(request)
+            LOGGER.info('getting json')
             jdata = c.json()
+            LOGGER.info('closing connection')
             c.close()
             LOGGER.debug(jdata)
         except:
