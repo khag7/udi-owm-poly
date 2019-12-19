@@ -127,11 +127,8 @@ class Controller(polyinterface.Controller):
 
         LOGGER.debug('request = %s' % request)
         try:
-            LOGGER.info('making request')
             c = requests.get(request)
-            LOGGER.info('getting json')
             jdata = c.json()
-            LOGGER.info('closing connection')
             c.close()
             LOGGER.debug(jdata)
         except:
@@ -197,28 +194,37 @@ class Controller(polyinterface.Controller):
             else:
                 vis = float(jdata['visibility']) * 0.000621371
             self.update_driver('DISTANC', round(vis,1), force)
-        if 'rain' in jdata:
-            # rain is reported in mm, need to convert to inches
-            if '3h' in jdata['rain']:
-                rain = float(jdata['rain']['3h'])
-                LOGGER.debug('Found rain value = ' + str(rain))
-            elif '1h' in jdata['rain']:
-                rain = float(jdata['rain']['1h'])
-                LOGGER.debug('Found rain value = ' + str(rain))
-            else:
-                rain = 0
-            if self.params.get('Units') == 'imperial':
-                rain *= 0.0393701
-        else:
-            rain = 0
-        LOGGER
+
+        rain = self.parse_precipitation(jdata, 'rain')
         self.update_driver('GV6', round(rain, 2), force)
+
+        snow = self.parse_precipitation(jdata, 'snow')
+        self.update_driver('GV8', round(snow, 2), force)
 
         if 'clouds' in jdata:
             self.update_driver('GV14', jdata['clouds']['all'], force)
         if 'weather' in jdata:
             self.update_driver('GV13', jdata['weather'][0]['id'], force)
         
+
+    # parse rain/snow values from data
+    def parse_precipitation(self, data, tag):
+        if tag in data:
+            if '3h' in data[tag]:
+                snow = float(data[tag]['3h'])
+            elif '1h' in data[tag]:
+                snow = float(data[tag]['1h'])
+            else:
+                snow = 0
+            LOGGER.debug('Found ' + tag + ' value = ' + str(snow))
+
+            # this is reported in mm, need to convert to inches
+            if self.params.get('Units') == 'imperial':
+                snow *= 0.0393701
+        else:
+            snow = 0
+
+        return snow
 
     def query_forecast(self):
         # Three hour forecast for 5 days (or about 30 entries). This
@@ -255,6 +261,11 @@ class Controller(polyinterface.Controller):
             for forecast in jdata['list']:
                 dt = forecast['dt_txt'].split(' ')
                 LOGGER.info('Day = ' + str(day) + ' - Forecast dt = ' + str(forecast['dt']))
+                # Forecast may optionally have rain or snow data. Should
+                # parse that.
+                rain = self.parse_precipitation(forecast, 'rain')
+                snow = self.parse_precipitation(forecast, 'snow')
+
                 # check for start of new day
                 if fcast[day] == {}:
                     if 0 <= day < len(uv_data):
@@ -274,6 +285,8 @@ class Controller(polyinterface.Controller):
                             'clouds': float(forecast['clouds']['all']),
                             'dt': forecast['dt'],
                             'uv': uv,
+                            'rain': rain,
+                            'snow': snow,
                             }
                     count = 0
                 elif dt[1] == '00:00:00':
@@ -304,6 +317,8 @@ class Controller(polyinterface.Controller):
                             'clouds': float(forecast['clouds']['all']),
                             'dt': forecast['dt'],
                             'uv': uv,
+                            'rain': rain,
+                            'snow': snow,
                             })
                     count = 0
                 else:
@@ -323,6 +338,8 @@ class Controller(polyinterface.Controller):
                     f['speed'] += float(forecast['wind']['speed'])
                     f['winddir'] += float(forecast['wind']['deg'])
                     f['clouds'] += float(forecast['clouds']['all'])
+                    f['rain'] += rain
+                    f['snow'] += snow
                     count += 1
             LOGGER.info('Created ' + str(day) +' days forecast.')
 
@@ -439,6 +456,7 @@ class Controller(polyinterface.Controller):
             {'driver': 'GV1', 'value': 0, 'uom': 4},       # min temp
             {'driver': 'GV4', 'value': 0, 'uom': 49},      # wind speed
             {'driver': 'GV6', 'value': 0, 'uom': 82},      # rain
+            {'driver': 'GV8', 'value': 0, 'uom': 82},      # snow
             {'driver': 'GV13', 'value': 0, 'uom': 25},     # climate conditions
             {'driver': 'GV14', 'value': 0, 'uom': 22},     # cloud conditions
             {'driver': 'DISTANC', 'value': 0, 'uom': 83},  # visibility

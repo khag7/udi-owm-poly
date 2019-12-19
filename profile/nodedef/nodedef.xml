@@ -11,6 +11,7 @@
       <st id="GV1" editor="TEMPERATURE" />
       <st id="GV4" editor="SPEED" />
       <st id="GV6" editor="RAIN" />
+      <st id="GV8" editor="RAIN" />
       <st id="GV13" editor="CONDITIONS" />
       <st id="GV14" editor="PERCENT" />
       <st id="DISTANC" editor="DISTANCE" />
@@ -40,6 +41,8 @@
       <st id="GV13" editor="CONDITIONS" />
       <st id="GV14" editor="PERCENT" />
       <st id="GV4" editor="SPEED" />
+      <st id="GV6" editor="RAIN" />
+      <st id="GV8" editor="RAIN" />
       <st id="UV" editor="UV" />
       <st id="GV20" editor="ET" />
     </sts>

@@ -25,6 +25,8 @@ class DailyNode(polyinterface.Node):
             {'driver': 'BARPRES', 'value': 0, 'uom': 118}, # pressure
             {'driver': 'GV13', 'value': 0, 'uom': 25},     # conditions
             {'driver': 'GV14', 'value': 0, 'uom': 22},     # clouds
+            {'driver': 'GV6', 'value': 0, 'uom': 82},      # rain
+            {'driver': 'GV8', 'value': 0, 'uom': 82},      # snow
             {'driver': 'GV4', 'value': 0, 'uom': 49},      # wind speed
             {'driver': 'UV', 'value': 0, 'uom': 71},       # UV index
             {'driver': 'GV20', 'value': 0, 'uom': 106},    # mm/day
@@ -39,6 +41,8 @@ class DailyNode(polyinterface.Node):
             'GV4': 49,
             'UV': 71,
             'GV20': 107,
+            'GV6': 82,
+            'GV8': 82,
             }
 
     def set_driver_uom(self, units):
@@ -65,6 +69,8 @@ class DailyNode(polyinterface.Node):
         self.update_driver('GV19', int(dow))
         self.update_driver('GV13', forecast['weather'])
         self.update_driver('UV', round(forecast['uv'], 1))
+        self.update_driver('GV6', round(forecast['rain'], 2))
+        self.update_driver('GV8', round(forecast['snow'], 2))
 
         # Calculate ETo
         #  Temp is in degree C and windspeed is in m/s, we may need to
