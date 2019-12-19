@@ -199,7 +199,7 @@ class Controller(polyinterface.Controller):
         self.update_driver('GV6', round(rain, 2), force)
 
         snow = self.parse_precipitation(jdata, 'snow')
-        self.update_driver('GV8', round(snow, 2), force)
+        self.update_driver('GV7', round(snow, 2), force)
 
         if 'clouds' in jdata:
             self.update_driver('GV14', jdata['clouds']['all'], force)
@@ -456,7 +456,7 @@ class Controller(polyinterface.Controller):
             {'driver': 'GV1', 'value': 0, 'uom': 4},       # min temp
             {'driver': 'GV4', 'value': 0, 'uom': 49},      # wind speed
             {'driver': 'GV6', 'value': 0, 'uom': 82},      # rain
-            {'driver': 'GV8', 'value': 0, 'uom': 82},      # snow
+            {'driver': 'GV7', 'value': 0, 'uom': 82},      # snow
             {'driver': 'GV13', 'value': 0, 'uom': 25},     # climate conditions
             {'driver': 'GV14', 'value': 0, 'uom': 22},     # cloud conditions
             {'driver': 'DISTANC', 'value': 0, 'uom': 83},  # visibility
