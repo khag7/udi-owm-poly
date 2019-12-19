@@ -235,6 +235,9 @@ class Controller(polyinterface.Controller):
                 return
 
             uv_data = self.get_weather_data('uvi/forecast', self.latitude, self.longitude)
+            LOGGER.info('Found ' + str(uv_data.length()) + ' UV forecasts')
+            # what if we have no UV data?  below we assume it's there and
+            # crash if it's not.
         except:
             LOGGER.error('Foreast query failed.')
             return
@@ -251,6 +254,11 @@ class Controller(polyinterface.Controller):
                 LOGGER.info('Day = ' + str(day) + ' - Forecast dt = ' + str(forecast['dt']))
                 # check for start of new day
                 if fcast[day] == {}:
+                    if 0 <= day < len(uv_data):
+                        uv = float(uv_data[day]['value'])
+                    else:
+                        uv = 0.0
+
                     fcast[day] = {
                             'temp_max': float(forecast['main']['temp']),
                             'temp_min': float(forecast['main']['temp']),
@@ -262,7 +270,7 @@ class Controller(polyinterface.Controller):
                             'winddir': float(forecast['wind']['deg']),
                             'clouds': float(forecast['clouds']['all']),
                             'dt': forecast['dt'],
-                            'uv': float(uv_data[day]['value']),
+                            'uv': uv,
                             }
                     count = 0
                 elif dt[1] == '00:00:00':
@@ -275,6 +283,12 @@ class Controller(polyinterface.Controller):
                         f['clouds'] /= count
 
                     day += 1
+
+                    if 0 <= day < len(uv_data):
+                        uv = float(uv_data[day]['value'])
+                    else:
+                        uv = 0.0
+
                     fcast.append({
                             'temp_max': float(forecast['main']['temp']),
                             'temp_min': float(forecast['main']['temp']),
@@ -286,7 +300,7 @@ class Controller(polyinterface.Controller):
                             'winddir': float(forecast['wind']['deg']),
                             'clouds': float(forecast['clouds']['all']),
                             'dt': forecast['dt'],
-                            'uv': float(uv_data[day]['value']),
+                            'uv': uv,
                             })
                     count = 0
                 else:
