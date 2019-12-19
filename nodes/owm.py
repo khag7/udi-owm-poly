@@ -244,7 +244,7 @@ class Controller(polyinterface.Controller):
                 return
 
             uv_data = self.get_weather_data('uvi/forecast', self.latitude, self.longitude)
-            LOGGER.info('Found ' + str(uv_data.length()) + ' UV forecasts')
+            LOGGER.info('Found ' + str(len(uv_data)) + ' UV forecasts')
             # what if we have no UV data?  below we assume it's there and
             # crash if it's not.
         except:
