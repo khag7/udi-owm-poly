@@ -27,6 +27,23 @@ The settings for this node are:
 #### Long Poll
    * How often to poll the OpenWeatherMap weather service. Note that the data is only updated every 10 minutes. Setting this to less may result in exceeding the free service rate limit.
 
+#### APIkey   
+	* Your API ID, needed to authorize connection to the OpenWeatherMap API.
+
+#### Units
+	* 'metric' or 'imperial' request data in this units format.
+
+#### Location
+    * by zip code (zip=xxxxxxx[,country code])
+    * by city name (q=city name[,country code])
+    * by city id (id=city id)
+    * by coordinates (lat=xx&lon=xxx)
+
+#### Elevation
+	* Height above sea level, in meters, for the location specified above. 
+
+#### Plant Type
+	* Crop coefficent for evapotranspiration calculation. Default is 0.23
 
 ## Requirements
 
@@ -50,6 +67,13 @@ The nodeserver keeps track of the version number and when a profile rebuild is n
 
 # Release Notes
 
+- 2.0.0 01/13/2020
+   - Redesign node server to make more module
+   - Add control to select logging level
+   - Add snow data
+   - Configurable number of forecast days
+   - Fix rain today data
+   - Change how custom parameters are maintained
 - 1.2.8 11/25/2019
    - Trap failures in http requests.
 - 1.2.7 09/15/2019
