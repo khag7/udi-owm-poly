@@ -26,7 +26,7 @@ LOGGER = polyinterface.LOGGER
 class Controller(polyinterface.Controller):
     id = 'weather'
     #id = 'controller'
-    hint = [0,0,0,0]
+    #hint = [0,0,0,0]
     def __init__(self, polyglot):
         super(Controller, self).__init__(polyglot)
         self.name = 'OpenWeatherMap'
