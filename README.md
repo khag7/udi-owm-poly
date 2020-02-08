@@ -39,6 +39,9 @@ The settings for this node are:
     * by city id (id=city id)
     * by coordinates (lat=xx&lon=xxx)
 
+#### Forecast Days
+	* The number of forecast nodes to create and populate. The range is 0 to 7.
+
 #### Elevation
 	* Height above sea level, in meters, for the location specified above. 
 
