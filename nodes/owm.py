@@ -42,7 +42,7 @@ class Controller(polyinterface.Controller):
             },
             {
             'name': 'Location',
-            'default': '',
+            'default': 'set me',
             'isRequired': True,
             'notice': 'OpenWeatherMap location must be set',
             },
