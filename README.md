@@ -65,7 +65,7 @@ The settings for this node are:
  * sys.node.[address].GV13    (current conditions)
  * sys.node.[address].GV14    (current percent cloud coverage)
 
- ### Forcast node
+ ### Forecast node
  * sys.node.[address].CLIHUM  (forecasted humidity)
  * sys.node.[address].BARPRES (forecasted barometric pressure)
  * sys.node.[address].UV      (forecasted max UV index)
