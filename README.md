@@ -48,6 +48,37 @@ The settings for this node are:
 #### Plant Type
 	* Crop coefficent for evapotranspiration calculation. Default is 0.23
 
+## Node substituion variables
+### Current condition node
+ * sys.node.<address>.ST      (Node sever online)
+ * sys.node.<address>.CLITEMP (current temperature)
+ * sys.node.<address>.CLIHUM  (current humidity)
+ * sys.node.<address>.BARPRES (current barometric pressure)
+ * sys.node.<address>.WINDDIR (current wind direction )
+ * sys.node.<address>.DISTANC (current visibility)
+ * sys.node.<address>.UV      (current UV index)
+ * sys.node.<address>.GV0     (current high temperature)
+ * sys.node.<address>.GV1     (current low temperature)
+ * sys.node.<address>.GV4     (current wind speed)
+ * sys.node.<address>.GV6     (current rain today)
+ * sys.node.<address>.GV7     (current snow today)
+ * sys.node.<address>.GV13    (current conditions)
+ * sys.node.<address>.GV14    (current percent cloud coverage)
+
+ ### Forcast node
+ * sys.node.<address>.CLIHUM  (forecasted humidity)
+ * sys.node.<address>.BARPRES (forecasted barometric pressure)
+ * sys.node.<address>.UV      (forecasted max UV index)
+ * sys.node.<address>.GV19    (day of week forecast is for)
+ * sys.node.<address>.GV0     (forecasted high temperature)
+ * sys.node.<address>.GV1     (forecasted low temperature)
+ * sys.node.<address>.GV13    (forecasted conditions)
+ * sys.node.<address>.GV14    (forecasted percent cloud coverage)
+ * sys.node.<address>.GV4     (forecasted wind speed)
+ * sys.node.<address>.GV6     (forecasted rain)
+ * sys.node.<address>.GV7     (forecasted snow)
+ * sys.node.<address>.GV20    (calculated ETo for the day)
+
 ## Requirements
 
 1. Polyglot V2 itself should be run on Raspian Stretch.
