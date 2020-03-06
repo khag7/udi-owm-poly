@@ -345,7 +345,10 @@ class Controller(polyinterface.Controller):
 
             for f in range(0,int(self.params.get('Forecast Days'))):
                 address = 'forecast_' + str(f)
-                self.nodes[address].update_forecast(fcast[f], self.latitude, self.params.get('Elevation'), self.params.get('Plant Type'), self.params.get('Units'))
+                if f < len(fcast):
+                    self.nodes[address].update_forecast(fcast[f], self.latitude, self.params.get('Elevation'), self.params.get('Plant Type'), self.params.get('Units'))
+                else:
+                    LOGGER.warning('No forecast information available for day ' + str(f))
 
     def query(self):
         for node in self.nodes:
