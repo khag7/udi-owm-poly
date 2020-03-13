@@ -10,6 +10,7 @@
       <st id="GV0" editor="TEMPERATURE" />
       <st id="GV1" editor="TEMPERATURE" />
       <st id="GV4" editor="SPEED" />
+      <st id="GV5" editor="SPEED" />
       <st id="GV6" editor="RAIN" />
       <st id="GV7" editor="RAIN" />
       <st id="GV13" editor="CONDITIONS" />

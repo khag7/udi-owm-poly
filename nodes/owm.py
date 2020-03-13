@@ -185,6 +185,8 @@ class Controller(polyinterface.Controller):
             # Wind data is apparently flaky so check to make sure it exist.
             if 'speed' in jdata['wind']:
                 self.update_driver('GV4', jdata['wind']['speed'], force)
+            if 'gust' in jdata['wind']:
+                self.update_driver('GV5', jdata['wind']['gust'], force)
             if 'deg' in jdata['wind']:
                 self.update_driver('WINDDIR', jdata['wind']['deg'], force)
         if 'visibility' in jdata:
@@ -465,6 +467,7 @@ class Controller(polyinterface.Controller):
             {'driver': 'GV0', 'value': 0, 'uom': 4},       # max temp
             {'driver': 'GV1', 'value': 0, 'uom': 4},       # min temp
             {'driver': 'GV4', 'value': 0, 'uom': 49},      # wind speed
+            {'driver': 'GV5', 'value': 0, 'uom': 49},      # gust speed
             {'driver': 'GV6', 'value': 0, 'uom': 82},      # rain
             {'driver': 'GV7', 'value': 0, 'uom': 82},      # snow
             {'driver': 'GV13', 'value': 0, 'uom': 25},     # climate conditions
