@@ -17,20 +17,28 @@ LOGGER = polyinterface.LOGGER
 @node_funcs.add_functions_as_methods(node_funcs.functions)
 class DailyNode(polyinterface.Node):
     id = 'daily'
-    drivers = [
-            {'driver': 'GV19', 'value': 0, 'uom': 25},     # day of week
-            {'driver': 'GV0', 'value': 0, 'uom': 4},       # high temp
-            {'driver': 'GV1', 'value': 0, 'uom': 4},       # low temp
-            {'driver': 'CLIHUM', 'value': 0, 'uom': 22},   # humidity
-            {'driver': 'BARPRES', 'value': 0, 'uom': 118}, # pressure
-            {'driver': 'GV13', 'value': 0, 'uom': 25},     # conditions
-            {'driver': 'GV14', 'value': 0, 'uom': 22},     # clouds
-            {'driver': 'GV6', 'value': 0, 'uom': 82},      # rain
-            {'driver': 'GV7', 'value': 0, 'uom': 82},      # snow
-            {'driver': 'GV4', 'value': 0, 'uom': 49},      # wind speed
-            {'driver': 'UV', 'value': 0, 'uom': 71},       # UV index
-            {'driver': 'GV20', 'value': 0, 'uom': 106},    # mm/day
-            ]
+    def __init__(self, controller, primary, address, name, units):
+        self.uom = uom.get_uom(units)
+        self.units = units
+
+        # Use the units to build an appropriate drivers array.
+        DailyNode.drivers.append({'driver': 'GV19', 'value': 0, 'uom': self.uom['GV19']})
+        DailyNode.drivers.append({'driver': 'GV0', 'value': 0, 'uom': self.uom['GV0']})
+        DailyNode.drivers.append({'driver': 'GV1', 'value': 0, 'uom': self.uom['GV1']})
+        DailyNode.drivers.append({'driver': 'CLIHUM', 'value': 0, 'uom': self.uom['CLIHUM']})
+        DailyNode.drivers.append({'driver': 'BARPRES', 'value': 0, 'uom': self.uom['BARPRES']})
+        DailyNode.drivers.append({'driver': 'GV13', 'value': 0, 'uom': self.uom['GV13']})
+        DailyNode.drivers.append({'driver': 'GV14', 'value': 0, 'uom': self.uom['GV14']})
+        DailyNode.drivers.append({'driver': 'GV6', 'value': 0, 'uom': self.uom['GV6']})
+        DailyNode.drivers.append({'driver': 'GV7', 'value': 0, 'uom': self.uom['GV7']})
+        DailyNode.drivers.append({'driver': 'GV4', 'value': 0, 'uom': self.uom['GV4']})
+        DailyNode.drivers.append({'driver': 'UV', 'value': 0, 'uom': self.uom['UV']})
+        DailyNode.drivers.append({'driver': 'GV20', 'value': 0, 'uom': self.uom['GV20']})
+
+        # call the default init
+        super(DailyNode, self).__init__(controller, primary, address, name)
+
+
     uom = {'GV19': 25,
             'GV0': 4,
             'GV1': 4,
@@ -54,8 +62,9 @@ class DailyNode(polyinterface.Node):
 
     def update_forecast(self, forecast, latitude, elevation, plant_type, units):
 
+        LOGGER.info(forecast)
         epoch = int(forecast['dt'])
-        dow = time.strftime("%w", time.gmtime(epoch))
+        dow = time.strftime("%w", time.localtime(epoch))
         LOGGER.info('Day of week = ' + dow)
 
         humidity = (forecast['Hmin'] + forecast['Hmax']) / 2

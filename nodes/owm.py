@@ -257,100 +257,112 @@ class Controller(polyinterface.Controller):
         LOGGER.info('Forecast has ' + str(jdata['cnt']) + ' lines of data')
         day = 0
         fcast.append({})
+        count = 0
+        temp_max = 0
+        temp_min = 200
+        Hmax = 0
+        Hmin = 100
+        pressure = 0
+        weather = 0
+        speed = 0
+        winddir = 0
+        clouds = 0
+        dt = 0
+        uv = 0
+        rain = 0
+        snow = 0
+        dow = -1
+
         if 'list' in jdata:
             for forecast in jdata['list']:
-                dt = forecast['dt_txt'].split(' ')
-                LOGGER.info('Day = ' + str(day) + ' - Forecast dt = ' + str(forecast['dt']))
+                dt_txt = forecast['dt_txt'].split(' ')
+                LOGGER.info('Day = ' + str(day) + ' - Forecast dt = ' + str(forecast['dt']) + ' ' + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(forecast['dt'])))
                 # Forecast may optionally have rain or snow data. Should
                 # parse that.
                 rain = self.parse_precipitation(forecast, 'rain')
                 snow = self.parse_precipitation(forecast, 'snow')
 
-                # check for start of new day
-                if fcast[day] == {}:
-                    if 0 <= day < len(uv_data):
-                        uv = float(uv_data[day]['value'])
-                    else:
-                        uv = 0.0
+                # We should convert 'dt' to local time and use that to determine day breaks.
+                hour = time.strftime('%H', time.localtime(forecast['dt']))
+                LOGGER.info('day = ' + str(dow) + ' hour = ' + hour)
 
-                    fcast[day] = {
-                            'temp_max': float(forecast['main']['temp']),
-                            'temp_min': float(forecast['main']['temp']),
-                            'Hmax': float(forecast['main']['humidity']),
-                            'Hmin': float(forecast['main']['humidity']),
-                            'pressure': float(forecast['main']['pressure']),
-                            'weather': float(forecast['weather'][0]['id']),
-                            'speed': float(forecast['wind']['speed']),
-                            'winddir': float(forecast['wind']['deg']),
-                            'clouds': float(forecast['clouds']['all']),
-                            'dt': forecast['dt'],
+                if dow != time.strftime("%w", time.localtime(forecast['dt'])):
+                    if count != 0:
+                        fcast.append({})
+                        fcast[day] = {
+                            'temp_max': temp_max,
+                            'temp_min': temp_min,
+                            'Hmax': Hmax,
+                            'Hmin': Hmin,
+                            'pressure': pressure / count,
+                            'weather': weather,
+                            'speed': speed / count,
+                            'winddir': winddir / count,
+                            'clouds': clouds / count,
+                            'dt': dt,
                             'uv': uv,
                             'rain': rain,
                             'snow': snow,
+                            'count': count,
                             }
+                        day += 1
+
+                    temp_max = 0
+                    temp_min = 200
+                    Hmax = 0
+                    Hmin = 100
+                    pressure = 0
+                    weather = 0
+                    speed = 0
+                    winddir = 0
+                    clouds = 0
+                    dt = 0
+                    uv = 0
+                    rain = 0
+                    snow = 0
                     count = 0
-                elif dt[1] == '00:00:00':
-                    # calculate averages for previous day
-                    f = fcast[day]
-                    if count > 0:
-                        f['pressure'] /= count
-                        f['speed'] /= count
-                        f['winddir'] /= count
-                        f['clouds'] /= count
+                    dow = time.strftime("%w", time.localtime(forecast['dt']))
 
-                    day += 1
-
-                    if 0 <= day < len(uv_data):
-                        uv = float(uv_data[day]['value'])
-                    else:
-                        uv = 0.0
-
-                    fcast.append({
-                            'temp_max': float(forecast['main']['temp']),
-                            'temp_min': float(forecast['main']['temp']),
-                            'Hmax': float(forecast['main']['humidity']),
-                            'Hmin': float(forecast['main']['humidity']),
-                            'pressure': float(forecast['main']['pressure']),
-                            'weather': float(forecast['weather'][0]['id']),
-                            'speed': float(forecast['wind']['speed']),
-                            'winddir': float(forecast['wind']['deg']),
-                            'clouds': float(forecast['clouds']['all']),
-                            'dt': forecast['dt'],
-                            'uv': uv,
-                            'rain': rain,
-                            'snow': snow,
-                            })
-                    count = 0
+                if 0 <= day < len(uv_data):
+                    uv = float(uv_data[day]['value'])
                 else:
-                    # update min/max averages
-                    f = fcast[day]
-                    if float(forecast['main']['temp']) > f['temp_max']:
-                        f['temp_max'] = float(forecast['main']['temp'])
-                    if float(forecast['main']['temp']) < f['temp_min']:
-                        f['temp_min'] = float(forecast['main']['temp'])
-                    if float(forecast['main']['humidity']) > f['Hmax']:
-                        f['Hmax'] = float(forecast['main']['humidity'])
-                    if float(forecast['main']['humidity']) < f['Hmin']:
-                        f['Hmin'] = float(forecast['main']['humidity'])
+                    uv = 0.0
 
-                    # sum for averages
-                    f['pressure'] += float(forecast['main']['pressure'])
-                    f['speed'] += float(forecast['wind']['speed'])
-                    f['winddir'] += float(forecast['wind']['deg'])
-                    f['clouds'] += float(forecast['clouds']['all'])
-                    f['rain'] += rain
-                    f['snow'] += snow
-                    count += 1
+                # Build daily forecast data
+                if float(forecast['main']['temp']) > temp_max:
+                    temp_max = float(forecast['main']['temp'])
+                if float(forecast['main']['temp']) < temp_min:
+                    temp_min = float(forecast['main']['temp'])
+                if float(forecast['main']['humidity']) > Hmax:
+                    Hmax = float(forecast['main']['humidity'])
+                if float(forecast['main']['humidity']) < Hmin:
+                    Hmin = float(forecast['main']['humidity'])
+                pressure += float(forecast['main']['pressure'])
+                weather = float(forecast['weather'][0]['id'])
+                speed += float(forecast['wind']['speed'])
+                winddir += float(forecast['wind']['deg'])
+                clouds += float(forecast['clouds']['all'])
+                dt = forecast['dt']
+                uv = uv
+                rain += rain
+                snow += snow
+                count += 1
+
+                
             LOGGER.info('Created ' + str(day) +' days forecast.')
 
             for f in range(0,int(self.params.get('Forecast Days'))):
                 address = 'forecast_' + str(f)
-                if f < len(fcast):
-                    self.nodes[address].update_forecast(fcast[f], self.latitude, self.params.get('Elevation'), self.params.get('Plant Type'), self.params.get('Units'))
+                if f < len(fcast) and fcast[f] != {}:
+                    if fcast[f]['count'] == 8:
+                        self.nodes[address].update_forecast(fcast[f], self.latitude, self.params.get('Elevation'), self.params.get('Plant Type'), self.params.get('Units'))
+                    else:
+                        LOGGER.debug('Skipping update for ' + address + ' because it lacks 8 records.')
                 else:
                     LOGGER.warning('No forecast information available for day ' + str(f))
 
     def query(self):
+        LOGGER.info("In Query...")
         for node in self.nodes:
             self.nodes[node].reportDrivers()
 
@@ -359,9 +371,9 @@ class Controller(polyinterface.Controller):
 
         # Create any additional nodes here
         num_days = int(self.params.get('Forecast Days'))
-        if num_days < 7:
+        if num_days < 5:
             # delete any extra days
-            for day in range(num_days, 7):
+            for day in range(num_days, 5):
                 address = 'forecast_' + str(day)
                 try:
                     self.delNode(address)
@@ -372,12 +384,15 @@ class Controller(polyinterface.Controller):
             address = 'forecast_' + str(day)
             title = 'Forecast ' + str(day)
             try:
-                node = owm_daily.DailyNode(self, self.address, address, title)
+                node = owm_daily.DailyNode(self, self.address, address, title, self.params.get('Units'))
                 self.addNode(node)
-            except:
+            except Exception as e:
                 LOGGER.error('Failed to create forecast node ' + title)
+                LOGGER.error(str(e))
 
-        self.set_driver_uom(self.params.get('Units'))
+        # Set the uom dictionary based on current user units preference
+        LOGGER.info('New Configure driver units to ' + units)
+        self.uom = uom.get_uom(units)
 
     # Delete the node server from Polyglot
     def delete(self):
@@ -396,22 +411,14 @@ class Controller(polyinterface.Controller):
         if self.params.get_from_polyglot(self):
             LOGGER.debug('All required parameters are set!')
             self.configured = True
-            if int(self.params.get('Forecast Days')) > 6:
-                addNotice('Number of days of forecast data is limited to 6 days', 'forecast')
-                self.params.set('Forecast Days', 6)
+            if int(self.params.get('Forecast Days')) > 5:
+                self.addNotice('Number of days of forecast data is limited to 5 days', 'forecast')
+                self.params.set('Forecast Days', 5)
         else:
             LOGGER.debug('Configuration required.')
             LOGGER.debug('APIkey = ' + self.params.get('APIkey'))
             LOGGER.debug('Location = ' + self.params.get('Location'))
             self.params.send_notices(self)
-
-    # Set the uom dictionary based on current user units preference
-    def set_driver_uom(self, units):
-        LOGGER.info('New Configure driver units to ' + units)
-        self.uom = uom.get_uom(units)
-        for day in range(0, int(self.params.get('Forecast Days'))):
-            address = 'forecast_' + str(day)
-            self.nodes[address].set_driver_uom(units)
 
     def remove_notices_all(self, command):
         self.removeNoticesAll()
