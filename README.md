@@ -101,6 +101,16 @@ The nodeserver keeps track of the version number and when a profile rebuild is n
 
 # Release Notes
 
+- 2.0.1 03/16/2020
+   - Add requests to the requirements
+   - Set a default for location
+   - Add Forecast Days parameter info
+   - Add node sustitution variables info to docs
+   - Limit Forecast Days to 5
+   - Check that forecast data actually exist before trying to use it
+   - Clean up forecast data nodes
+   - Add wind gust to current conditions
+   - Change "Rain Today" to "Rain 1/3hr" 
 - 2.0.0 01/13/2020
    - Redesign node server to make more module
    - Add control to select logging level
