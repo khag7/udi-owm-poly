@@ -101,6 +101,8 @@ The nodeserver keeps track of the version number and when a profile rebuild is n
 
 # Release Notes
 
+- 2.0.2 03/17/2020
+   - Fix syntax error in discover
 - 2.0.1 03/16/2020
    - Add requests to the requirements
    - Set a default for location
