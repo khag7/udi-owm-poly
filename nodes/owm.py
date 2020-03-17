@@ -393,8 +393,8 @@ class Controller(polyinterface.Controller):
                 LOGGER.error(str(e))
 
         # Set the uom dictionary based on current user units preference
-        LOGGER.info('New Configure driver units to ' + units)
-        self.uom = uom.get_uom(units)
+        LOGGER.info('New Configure driver units to ' + self.params.get('Units'))
+        self.uom = uom.get_uom(self.params.get('Units'))
 
     # Delete the node server from Polyglot
     def delete(self):
