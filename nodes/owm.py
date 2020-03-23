@@ -27,14 +27,14 @@ class Controller(polyinterface.Controller):
     id = 'weather'
     #id = 'controller'
     #hint = [0,0,0,0]
+    self.discovery = False
+    self.started = False
     def __init__(self, polyglot):
         super(Controller, self).__init__(polyglot)
         self.name = 'OpenWeatherMap'
         self.address = 'weather'
         self.primary = self.address
         self.configured = False
-        self.started = False
-        self.discovery = False
 
         self.params = node_funcs.NSParameters([{
             'name': 'APIkey',
