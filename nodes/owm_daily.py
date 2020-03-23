@@ -20,20 +20,21 @@ class DailyNode(polyinterface.Node):
     def __init__(self, controller, primary, address, name, units):
         self.uom = uom.get_uom(units)
         self.units = units
+        self.drivers = []
 
         # Use the units to build an appropriate drivers array.
-        DailyNode.drivers.append({'driver': 'GV19', 'value': 0, 'uom': self.uom['GV19']})
-        DailyNode.drivers.append({'driver': 'GV0', 'value': 0, 'uom': self.uom['GV0']})
-        DailyNode.drivers.append({'driver': 'GV1', 'value': 0, 'uom': self.uom['GV1']})
-        DailyNode.drivers.append({'driver': 'CLIHUM', 'value': 0, 'uom': self.uom['CLIHUM']})
-        DailyNode.drivers.append({'driver': 'BARPRES', 'value': 0, 'uom': self.uom['BARPRES']})
-        DailyNode.drivers.append({'driver': 'GV13', 'value': 0, 'uom': self.uom['GV13']})
-        DailyNode.drivers.append({'driver': 'GV14', 'value': 0, 'uom': self.uom['GV14']})
-        DailyNode.drivers.append({'driver': 'GV6', 'value': 0, 'uom': self.uom['GV6']})
-        DailyNode.drivers.append({'driver': 'GV7', 'value': 0, 'uom': self.uom['GV7']})
-        DailyNode.drivers.append({'driver': 'GV4', 'value': 0, 'uom': self.uom['GV4']})
-        DailyNode.drivers.append({'driver': 'UV', 'value': 0, 'uom': self.uom['UV']})
-        DailyNode.drivers.append({'driver': 'GV20', 'value': 0, 'uom': self.uom['GV20']})
+        self.drivers.append({'driver': 'GV19', 'value': 0, 'uom': self.uom['GV19']})
+        self.drivers.append({'driver': 'GV0', 'value': 0, 'uom': self.uom['GV0']})
+        self.drivers.append({'driver': 'GV1', 'value': 0, 'uom': self.uom['GV1']})
+        self.drivers.append({'driver': 'CLIHUM', 'value': 0, 'uom': self.uom['CLIHUM']})
+        self.drivers.append({'driver': 'BARPRES', 'value': 0, 'uom': self.uom['BARPRES']})
+        self.drivers.append({'driver': 'GV13', 'value': 0, 'uom': self.uom['GV13']})
+        self.drivers.append({'driver': 'GV14', 'value': 0, 'uom': self.uom['GV14']})
+        self.drivers.append({'driver': 'GV6', 'value': 0, 'uom': self.uom['GV6']})
+        self.drivers.append({'driver': 'GV7', 'value': 0, 'uom': self.uom['GV7']})
+        self.drivers.append({'driver': 'GV4', 'value': 0, 'uom': self.uom['GV4']})
+        self.drivers.append({'driver': 'UV', 'value': 0, 'uom': self.uom['UV']})
+        self.drivers.append({'driver': 'GV20', 'value': 0, 'uom': self.uom['GV20']})
 
         # call the default init
         super(DailyNode, self).__init__(controller, primary, address, name)
