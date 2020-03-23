@@ -27,14 +27,14 @@ class Controller(polyinterface.Controller):
     id = 'weather'
     #id = 'controller'
     #hint = [0,0,0,0]
-    discovery = False
-    started = False
     def __init__(self, polyglot):
         super(Controller, self).__init__(polyglot)
         self.name = 'OpenWeatherMap'
         self.address = 'weather'
         self.primary = self.address
         self.configured = False
+        self.discovery = False
+        self.started = False
 
         self.params = node_funcs.NSParameters([{
             'name': 'APIkey',
@@ -88,8 +88,8 @@ class Controller(polyinterface.Controller):
             self.removeNoticesAll()
             self.configured = True
             if self.params.isSet('Forecast Days'):
-                if started:
-                    LOGGER.info('calling discover because forecast days set')
+                if self.started:
+                    LOGGER.info('calling discover because forecast days set and ' + str(self.started))
                     self.discover()
         elif valid:
             LOGGER.debug('-- configuration not changed, but is valid')
@@ -103,7 +103,7 @@ class Controller(polyinterface.Controller):
         # Do an initial query to get filled in as soon as possible
         self.query_conditions()
         self.query_forecast()
-        started = True
+        self.started = True
 
     def longPoll(self):
         self.query_forecast()
@@ -374,11 +374,11 @@ class Controller(polyinterface.Controller):
             self.nodes[node].reportDrivers()
 
     def discover(self, *args, **kwargs):
-        if discovery:
+        if self.discovery:
             LOGGER.info('Discover already running.')
             return
 
-        discovery = True
+        self.discovery = True
         LOGGER.info("In Discovery...")
 
         # Create any additional nodes here
@@ -405,7 +405,7 @@ class Controller(polyinterface.Controller):
         # Set the uom dictionary based on current user units preference
         LOGGER.info('New Configure driver units to ' + self.params.get('Units'))
         self.uom = uom.get_uom(self.params.get('Units'))
-        discovery = False
+        self.discovery = False
 
     # Delete the node server from Polyglot
     def delete(self):
