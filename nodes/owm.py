@@ -118,6 +118,14 @@ class Controller(polyinterface.Controller):
     def shortPoll(self):
         self.query_conditions()
 
+    def removeNotice(self, data):
+        try:
+            newData = deepcopy(self.poly.config['notices'])
+            newData.pop(data)
+            self.poly.saveNotices(newData)
+        except KeyError:
+            LOGGER.error('{} not found in notices, Ignoring...'.format(data), exc_info=True)
+
     # extra = weather or forecast or uvi
     def get_weather_data(self, extra, lat=None, lon=None):
         request = 'http://api.openweathermap.org/data/2.5/' + extra + '?'
