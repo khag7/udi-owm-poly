@@ -97,7 +97,10 @@ class DailyNode(polyinterface.Node):
             Ws = et3.mph2ms(Ws)
 
         et0 = et3.evapotranspriation(Tmax, Tmin, None, Ws, float(elevation), forecast['Hmax'], forecast['Hmin'], latitude, float(plant_type), J)
-        self.update_driver('GV20', round(et0, 2))
+        if self.units == 'imperial':
+            self.update_driver('GV20', round(self.mm2inch(et0), 3))
+        else:
+            self.update_driver('GV20', round(et0, 2))
         LOGGER.info("ETo = %f %f" % (et0, self.mm2inch(et0)))
 
 
