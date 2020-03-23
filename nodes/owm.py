@@ -108,6 +108,7 @@ class Controller(polyinterface.Controller):
         self.started = True
 
     def initialize(self):
+        time.sleep(2)  # give things some time to settle
         self.query_conditions()
         self.query_forecast()
 
