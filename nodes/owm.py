@@ -27,8 +27,8 @@ class Controller(polyinterface.Controller):
     id = 'weather'
     #id = 'controller'
     #hint = [0,0,0,0]
-    self.discovery = False
-    self.started = False
+    discovery = False
+    started = False
     def __init__(self, polyglot):
         super(Controller, self).__init__(polyglot)
         self.name = 'OpenWeatherMap'
@@ -88,7 +88,7 @@ class Controller(polyinterface.Controller):
             self.removeNoticesAll()
             self.configured = True
             if self.params.isSet('Forecast Days'):
-                if self.started:
+                if started:
                     LOGGER.info('calling discover because forecast days set')
                     self.discover()
         elif valid:
@@ -103,7 +103,7 @@ class Controller(polyinterface.Controller):
         # Do an initial query to get filled in as soon as possible
         self.query_conditions()
         self.query_forecast()
-        self.started = True
+        started = True
 
     def longPoll(self):
         self.query_forecast()
@@ -374,11 +374,11 @@ class Controller(polyinterface.Controller):
             self.nodes[node].reportDrivers()
 
     def discover(self, *args, **kwargs):
-        if self.discovery:
+        if discovery:
             LOGGER.info('Discover already running.')
             return
 
-        self.discovery = True
+        discovery = True
         LOGGER.info("In Discovery...")
 
         # Create any additional nodes here
@@ -405,7 +405,7 @@ class Controller(polyinterface.Controller):
         # Set the uom dictionary based on current user units preference
         LOGGER.info('New Configure driver units to ' + self.params.get('Units'))
         self.uom = uom.get_uom(self.params.get('Units'))
-        self.discovery = False
+        discovery = False
 
     # Delete the node server from Polyglot
     def delete(self):
