@@ -34,6 +34,7 @@ class Controller(polyinterface.Controller):
         self.primary = self.address
         self.configured = False
         self.started = False
+        self.discovery = False
 
         self.params = node_funcs.NSParameters([{
             'name': 'APIkey',
@@ -88,6 +89,7 @@ class Controller(polyinterface.Controller):
             self.configured = True
             if self.params.isSet('Forecast Days'):
                 if self.started:
+                    LOGGER.info('calling discover because forecast days set')
                     self.discover()
         elif valid:
             LOGGER.debug('-- configuration not changed, but is valid')
@@ -372,6 +374,11 @@ class Controller(polyinterface.Controller):
             self.nodes[node].reportDrivers()
 
     def discover(self, *args, **kwargs):
+        if self.discovery:
+            LOGGER.info('Discover already running.')
+            return
+
+        self.discovery = True
         LOGGER.info("In Discovery...")
 
         # Create any additional nodes here
@@ -398,6 +405,7 @@ class Controller(polyinterface.Controller):
         # Set the uom dictionary based on current user units preference
         LOGGER.info('New Configure driver units to ' + self.params.get('Units'))
         self.uom = uom.get_uom(self.params.get('Units'))
+        self.discovery = False
 
     # Delete the node server from Polyglot
     def delete(self):
