@@ -104,11 +104,16 @@ class NSParameters:
                 'isSet': False,
                 'isRequired': p['isRequired'],
                 'notice_msg': p['notice'],
+                'isChanged': False,
                 })
 
     def set(self, name, value):
         for p in self.internal:
             if p['name'] == name:
+                if p['value'] != value:
+                    p['isChanged'] = True
+                else:
+                    p['isChanged'] = False
                 p['value'] = value
                 p['isSet'] = True
                 return
@@ -125,6 +130,12 @@ class NSParameters:
         for p in self.internal:
             if p['name'] == name:
                 return p['isSet']
+        return False
+
+    def isChanged(self, name):
+        for p in self.internal:
+            if p['name'] == name:
+                return p['isChanged']
         return False
 
     """
@@ -154,7 +165,15 @@ class NSParameters:
             LOGGER.debug('checking for ' + p['name'] + ' in customParams')
             if p['name'] in customParams:
                 LOGGER.debug('found ' + p['name'] + ' in customParams')
-                p['value'] = customParams[p['name']]
+                val = customParams[p['name']]
+
+                if val != p['value']:
+                    p['isChanged'] = True
+                else:
+                    p['isChanged'] = False
+
+                p['value'] = val
+
                 if p['value'] != p['default']:
                     LOGGER.debug(p['name'] + ' is now set')
                     p['isSet'] = True
@@ -189,6 +208,9 @@ class NSParameters:
                     # did it change?
                     if poly_param != p['default'] and poly_param != p['value']:
                         changed = True
+                        p['isChanged'] = True
+                    else:
+                        p['isChanged'] = False
 
                     # is it different from the default?
                     if poly_param != p['default']:
