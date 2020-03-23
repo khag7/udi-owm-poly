@@ -33,6 +33,7 @@ class Controller(polyinterface.Controller):
         self.address = 'weather'
         self.primary = self.address
         self.configured = False
+        self.started = False
 
         self.params = node_funcs.NSParameters([{
             'name': 'APIkey',
@@ -86,7 +87,8 @@ class Controller(polyinterface.Controller):
             self.removeNoticesAll()
             self.configured = True
             if self.params.isSet('Forecast Days'):
-                self.discover()
+                if self.started:
+                    self.discover()
         elif valid:
             LOGGER.debug('-- configuration not changed, but is valid')
 
@@ -99,6 +101,7 @@ class Controller(polyinterface.Controller):
         # Do an initial query to get filled in as soon as possible
         self.query_conditions()
         self.query_forecast()
+        self.started = True
 
     def longPoll(self):
         self.query_forecast()
