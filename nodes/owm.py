@@ -107,7 +107,7 @@ class Controller(polyinterface.Controller):
 
         self.started = True
 
-    def initialzie(self):
+    def initialize(self):
         self.query_conditions()
         self.query_forecast()
 
