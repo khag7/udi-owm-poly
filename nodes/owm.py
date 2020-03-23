@@ -365,7 +365,11 @@ class Controller(polyinterface.Controller):
                 
             LOGGER.info('Created ' + str(day) +' days forecast.')
 
-            self.removeNotice('noData')
+            try:
+                self.removeNotice('noData')
+            except Exception as e:
+                LOGGER.error(e)
+
             for f in range(0,int(self.params.get('Forecast Days'))):
                 address = 'forecast_' + str(f)
                 if f < len(fcast) and fcast[f] != {}:
