@@ -91,6 +91,7 @@ class Controller(polyinterface.Controller):
                 if self.started:
                     LOGGER.info('calling discover because forecast days set and ' + str(self.started))
                     self.discover()
+                    self.initialize()
         elif valid:
             LOGGER.debug('-- configuration not changed, but is valid')
 
@@ -101,9 +102,14 @@ class Controller(polyinterface.Controller):
         LOGGER.info('Node server started')
 
         # Do an initial query to get filled in as soon as possible
+        if self.configured:
+            self.initialize()
+
+        self.started = True
+
+    def initialzie(self):
         self.query_conditions()
         self.query_forecast()
-        self.started = True
 
     def longPoll(self):
         self.query_forecast()
