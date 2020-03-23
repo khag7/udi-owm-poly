@@ -19,7 +19,6 @@ import json
 import node_funcs
 from nodes import owm_daily
 from nodes import uom
-from copy import deepcopy
 
 LOGGER = polyinterface.LOGGER
 
@@ -35,7 +34,7 @@ class Controller(polyinterface.Controller):
         self.primary = self.address
         self.configured = False
         self.discovery = False
-        self.started = False
+        self.start_finished = False
 
         self.params = node_funcs.NSParameters([{
             'name': 'APIkey',
@@ -88,9 +87,9 @@ class Controller(polyinterface.Controller):
             LOGGER.debug('-- configuration is valid')
             self.removeNoticesAll()
             self.configured = True
-            if self.params.isSet('Forecast Days'):
-                if self.started:
-                    LOGGER.info('calling discover because forecast days set and ' + str(self.started))
+            if self.params.isChanged('Forecast Days'):
+                if self.start_finished:
+                    LOGGER.info('calling discover because forecast days set and ' + str(self.start_finished))
                     self.discover()
                     self.initialize()
         elif valid:
@@ -106,7 +105,7 @@ class Controller(polyinterface.Controller):
         if self.configured:
             self.initialize()
 
-        self.started = True
+        self.start_finished = True
 
     def initialize(self):
         time.sleep(2)  # give things some time to settle
@@ -118,14 +117,6 @@ class Controller(polyinterface.Controller):
 
     def shortPoll(self):
         self.query_conditions()
-
-    def removeNotice(self, data):
-        try:
-            newData = deepcopy(self.poly.config['notices'])
-            newData.pop(data)
-            self.poly.saveNotices(newData)
-        except KeyError:
-            LOGGER.error('{} not found in notices, Ignoring...'.format(data), exc_info=True)
 
     # extra = weather or forecast or uvi
     def get_weather_data(self, extra, lat=None, lon=None):
