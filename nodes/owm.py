@@ -365,6 +365,7 @@ class Controller(polyinterface.Controller):
                 
             LOGGER.info('Created ' + str(day) +' days forecast.')
 
+            self.removeNotice('noData')
             for f in range(0,int(self.params.get('Forecast Days'))):
                 address = 'forecast_' + str(f)
                 if f < len(fcast) and fcast[f] != {}:
@@ -372,6 +373,10 @@ class Controller(polyinterface.Controller):
                         self.nodes[address].update_forecast(fcast[f], self.latitude, self.params.get('Elevation'), self.params.get('Plant Type'), self.params.get('Units'))
                     else:
                         LOGGER.debug('Skipping update for ' + address + ' because it lacks 8 records.')
+                        try:
+                            self.addNotice('Insufficient data for forecast ' + address, 'noData')
+                        except:
+                            self.addNotice({'noData': 'Insufficent data for forecast ' + address})
                 else:
                     LOGGER.warning('No forecast information available for day ' + str(f))
 
