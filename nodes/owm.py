@@ -19,6 +19,7 @@ import json
 import node_funcs
 from nodes import owm_daily
 from nodes import uom
+from copy import deepcopy
 
 LOGGER = polyinterface.LOGGER
 
