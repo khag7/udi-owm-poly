@@ -39,7 +39,7 @@ def get_uom(units):
             'GV12': 25,     # climate intensity
             'GV13': 25,     # climate conditions
             'GV14': 22,     # cloud conditions
-            'DISTANC': 38,  # visibility
+            'DISTANC': 83,  # visibility
             'UV': 71,       # UV index
             'GV17': 56,     # Air Quality
             'GV18': 22,     # chance of precipitation
