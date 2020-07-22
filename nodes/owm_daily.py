@@ -90,7 +90,7 @@ class DailyNode(polyinterface.Node):
         Tmin = forecast['temp_min']
         Tmax = forecast['temp_max']
         Ws = forecast['speed']
-        if units != 'si':
+        if units != 'metric':
             LOGGER.info('Conversion of temperature/wind speed required')
             Tmin = et3.FtoC(Tmin)
             Tmax = et3.FtoC(Tmax)
