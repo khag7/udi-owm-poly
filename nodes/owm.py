@@ -380,7 +380,7 @@ class Controller(polyinterface.Controller):
                         try:
                             self.addNotice('Insufficient data for forecast ' + address, 'noData')
                         except:
-                            self.addNotice({'noData': 'Insufficent data for forecast ' + address})
+                            self.addNotice({'noData': 'Insufficient data for forecast ' + address})
                 else:
                     LOGGER.warning('No forecast information available for day ' + str(f))
 
